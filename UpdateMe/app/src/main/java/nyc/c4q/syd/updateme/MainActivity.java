@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.TextView;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -21,9 +22,7 @@ import java.io.InputStreamReader;
 
 public class MainActivity extends ActionBarActivity{
 
-    static String yahooStockInfo = "https://query.yahooapis.com/v1/public/yql?q=select%20*%20from%20" +
-            "yahoo.finance.quote%20where%20symbol%20in%20(%22MSFT%22)&format=json&diagnostics=true&env=store%3A%2F%2Fdatatables.org" +
-            "%2Falltableswithkeys&callback=";
+    static String yahooStockInfo = "https://query.yahooapis.com/v1/public/yql?q=select%20*%20from%20yahoo.finance.quote%20where%20symbol%20in%20(%22MSFT%22)&format=json&diagnostics=true&env=store%3A%2F%2Fdatatables.org%2Falltableswithkeys&callback=";
     static String stockSymbol = "";
     static String stockChange = "";
     static String stockPrice = "";
@@ -33,7 +32,7 @@ public class MainActivity extends ActionBarActivity{
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        new myAsyncTask.execute();
+        new myAsyncTask().execute();
     }
 
 
@@ -93,21 +92,34 @@ public class MainActivity extends ActionBarActivity{
             JSONObject jsonObject;
 
             try{
-                result.substring(7);
-                result = result.substring(0,result.length()-2);
+
                 //Log.v()
                 jsonObject = new JSONObject(result);
                 JSONObject queryJSONObject = jsonObject.getJSONObject("query");
                 JSONObject resultJSONObject = queryJSONObject.getJSONObject("results");
                 JSONObject quoteJSONObject = resultJSONObject.getJSONObject("quote");
-            }catch (Exception e ){
 
+                stockSymbol = quoteJSONObject.getString("symbol");
+                Log.v("Stock Symbol", stockSymbol);
+                stockChange = quoteJSONObject.getString("Change");
+                Log.v("Stock Change", stockChange);
+                stockPrice = quoteJSONObject.getString("LastTradePriceOnly");
+                Log.v("Stock Price", stockPrice);
+            }catch (Exception e ){
+                e.printStackTrace();
             }
-            return null;
+            return result;
         }
 
         @Override
         protected void onPostExecute(String result) {
+            TextView line1 = (TextView)findViewById(R.id.line1);
+            TextView line2 = (TextView)findViewById(R.id.line2);
+            TextView line3 = (TextView)findViewById(R.id.line3);
+
+            line1.setText("Stock: "+stockSymbol);
+            line2.setText("Last Trade Price: " + stockPrice);
+            line3.setText("Change: "+stockChange);
 
         }
     }
