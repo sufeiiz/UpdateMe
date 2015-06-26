@@ -15,9 +15,9 @@
         card_view:cardBackgroundColor="#7C4DFF">
 
         <TextView
+            android:id="@+id/map_textview"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Enter address"/>
+            android:layout_height="wrap_content" />
 
         <fragment
             android:id="@+id/map"
