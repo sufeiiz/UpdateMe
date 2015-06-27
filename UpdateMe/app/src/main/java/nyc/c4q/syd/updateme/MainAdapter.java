@@ -1,13 +1,34 @@
 package nyc.c4q.syd.updateme;
+import android.app.Activity;
 import android.content.Context;
+import android.content.IntentSender;
+import android.location.Location;
+import android.os.Bundle;
+import android.support.v4.app.FragmentActivity;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
+
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.LocationListener;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.location.places.Places;
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.MapFragment;
+import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
+import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,6 +39,18 @@ import java.util.List;
 public class MainAdapter extends RecyclerView.Adapter {
     private List<Card> cardsArray;
     private Context context;
+
+    // MAP VARIABLES
+    private final static int CONNECTION_FAILURE_RESOLUTION_REQUEST = 9000;
+    private GoogleApiClient client;
+    private LatLng markerLatLng, locationLatLng;
+    private GoogleMap map;
+    private Location location;
+    private boolean hasMarker = false;
+    private Marker mark;
+    private LocationRequest mLocationRequest;
+    private DirectionsFetcher df;
+    private TextView info;
 
     public MainAdapter(Context context, List<Card> cardsArray) {
         this.context = context;
@@ -55,13 +88,129 @@ public class MainAdapter extends RecyclerView.Adapter {
         }
     }
 
-    public class MapViewHolder extends RecyclerView.ViewHolder {
-        protected TextView string;
+    public class MapViewHolder extends RecyclerView.ViewHolder implements OnMapReadyCallback,
+            GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener {
 
         public MapViewHolder(View v) {
             super(v);
-            string = (TextView) v.findViewById(R.id.tv);
 
+            // Connect to Geolocation API to make current location request
+            buildGoogleApiClient();
+            mLocationRequest = LocationRequest.create()
+                    .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY)
+                    .setInterval(10000)        // 10 seconds, in milliseconds
+                    .setFastestInterval(1000); // 1 second, in milliseconds
+
+            // Create MapFragment based on map xml
+            MapFragment mapFragment = (MapFragment) ((Activity) context).getFragmentManager().findFragmentById(R.id.map);
+            mapFragment.getMapAsync(this);
+            map = mapFragment.getMap();
+
+            Button button = (Button) v.findViewById(R.id.change_destination);
+            info = (TextView) v.findViewById(R.id.map_info);
+            button.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    // TODO: PLACES NOT DONE
+                }
+            });
+        }
+
+        @Override
+        public void onMapReady(final GoogleMap map) {
+
+            map.setMyLocationEnabled(true);
+            //map.moveCamera(CameraUpdateFactory.newLatLngZoom(, 13));
+
+            // create new marker when map is clicked, manipulated to allow only 1 marker
+            map.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
+                @Override
+                public void onMapClick(LatLng latLng) {
+                    if (!hasMarker) {
+                        mark = map.addMarker(new MarkerOptions().position(latLng).draggable(true));
+                        hasMarker = true;
+                    } else {
+                        mark.remove();
+                        mark = map.addMarker(new MarkerOptions().position(latLng).draggable(true));
+                    }
+                    markerLatLng = latLng;
+                }
+            });
+
+            new GoogleMap.OnMarkerClickListener() {
+                @Override
+                public boolean onMarkerClick(Marker marker) {
+                    //TODO: directions to and from?
+                    return false;
+                }
+            };
+        }
+
+        // Override methods for Connection Call Back for Geolocation API
+        @Override
+        public void onConnected(Bundle bundle) {
+            location = LocationServices.FusedLocationApi.getLastLocation(client);
+            if (location == null)
+                LocationServices.FusedLocationApi.requestLocationUpdates(client, mLocationRequest, this);
+            else
+                handleNewLocation(location);
+        }
+
+        @Override
+        public void onConnectionSuspended(int i) {}
+
+        @Override
+        public void onConnectionFailed(ConnectionResult connectionResult) {
+            if (connectionResult.hasResolution()) {
+                try {
+                    // Start an Activity that tries to resolve the error
+                    connectionResult.startResolutionForResult(((Activity) context), CONNECTION_FAILURE_RESOLUTION_REQUEST);
+                } catch (IntentSender.SendIntentException e) {
+                    e.printStackTrace();
+                }
+            } else {
+                Log.i("MAP", "Location services connection failed with code " + connectionResult.getErrorCode());
+            }
+        }
+
+        @Override
+        public void onLocationChanged(Location location) {
+            handleNewLocation(location);
+        }
+
+        private void handleNewLocation(Location location) {
+            double latitude = location.getLatitude();
+            double longitude = location.getLongitude();
+            locationLatLng = new LatLng(latitude, longitude);
+            String origin = latitude + "," + longitude;
+
+            // Set initial view to current location
+            MarkerOptions options = new MarkerOptions()
+                    .position(locationLatLng)
+                    .title("I am here!");
+            System.out.println("map: " + map);
+            map.addMarker(options);
+            map.moveCamera(CameraUpdateFactory.newLatLng(locationLatLng));
+            map.animateCamera(CameraUpdateFactory.zoomTo(18));
+            df = new DirectionsFetcher(info, map, origin, "new+york", "car");
+            df.execute();
+        }
+
+        private void setUpMapIfNeeded() {
+            // if map was not already instantiated, try to obtain the map from the MapFragment
+            if (map == null)
+                map = ((MapFragment) ((Activity) context).getFragmentManager().findFragmentById(R.id.map)).getMap();
+        }
+
+        protected synchronized void buildGoogleApiClient() {
+            client = new GoogleApiClient.Builder(context)
+                    .addConnectionCallbacks(this)
+                    .addOnConnectionFailedListener(this)
+                    .addApi(LocationServices.API)
+                    .addApi(Places.GEO_DATA_API)
+                    .addApi(Places.PLACE_DETECTION_API)
+                    .build();
+            client.connect();
         }
     }
 
@@ -113,7 +262,6 @@ public class MainAdapter extends RecyclerView.Adapter {
         if (holder.getItemViewType() == 2) {
             MapCard mapCard = (MapCard) cardsArray.get(position);
             MapViewHolder mapHolder = (MapViewHolder) holder;
-            mapHolder.string.setText(mapCard.getString());
         }
     }
 
