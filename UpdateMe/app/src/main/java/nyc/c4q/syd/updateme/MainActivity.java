@@ -1,38 +1,139 @@
 package nyc.c4q.syd.updateme;
 
-import android.os.AsyncTask;
+import android.app.AlertDialog;
+import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
-import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.TextView;
-
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.params.BasicHttpParams;
-import org.json.JSONObject;
-
-import java.io.BufferedReader;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.util.Arrays;
 
 
 public class MainActivity extends ActionBarActivity{
 
-    static String yahooStockInfo = "https://query.yahooapis.com/v1/public/yql?q=select%20*%20from%20yahoo.finance.quote%20where%20symbol%20in%20(%22MSFT%22)&format=json&diagnostics=true&env=store%3A%2F%2Fdatatables.org%2Falltableswithkeys&callback=";
-    static String stockSymbol = "";
-    static String stockChange = "";
-    static String stockPrice = "";
-
+    public final static String STOCK_SYMBOL = "fattyduck.stockquote.STOCK";
+    private SharedPreferences stockSymbolsEntered;
+    private LinearLayout stockTableScrollView;
+    private EditText stockSymbolEditText;
+    Button deleteStockSymbolButton;
+    Button getStockSymbolButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        new myAsyncTask().execute();
+        stockSymbolsEntered = getSharedPreferences("stocklist", MODE_PRIVATE);
+        initializeViews();
+
+        getStockSymbolButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                if (stockSymbolEditText.getText().length() > 0) {
+                    saveStockSymbol(stockSymbolEditText.getText().toString());
+                    stockSymbolEditText.setText("");
+//                    InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+//                    imm.hideSoftInputFromWindow(stockSymbolEditText.getWindowToken(), 0);
+                } else {
+
+                    AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+                    builder.setTitle(R.string.invalid_stock_symbol).setPositiveButton(R.string.ok
+                            , null).setMessage(R.string.missing_stock_symbol);
+
+                    AlertDialog theAlertDialog = builder.create();
+                    theAlertDialog.show();
+                }
+
+            }
+        });
+
+        deleteStockSymbolButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                deleteAllStocks();
+                SharedPreferences.Editor editor = stockSymbolsEntered.edit();
+                editor.clear();
+                editor.apply();
+            }
+        });
+        updateSavedStockList(null);
+
+    }
+
+
+    private void saveStockSymbol(String newStock){
+        String isTheStockNew = stockSymbolsEntered.getString(newStock,null);
+        SharedPreferences.Editor editor = stockSymbolsEntered.edit();
+        editor.putString(newStock, newStock);
+        editor.apply();
+
+        if(isTheStockNew == null){
+            updateSavedStockList(newStock);
+        }
+
+    }
+
+    public void updateSavedStockList(String newStockSymbol){
+
+        String[] stocks = stockSymbolsEntered.getAll().keySet().toArray(new String[0]);
+        Arrays.sort(stocks, String.CASE_INSENSITIVE_ORDER);
+
+        if(newStockSymbol!=null){
+
+            inserStockInScrollview(newStockSymbol,Arrays.binarySearch(stocks, newStockSymbol));
+
+        }else {
+            for(int i = 0; i<stocks.length; i++){
+                inserStockInScrollview(stocks[i], i);
+            }
+        }
+
+    }
+
+    public void inserStockInScrollview(String stock, int arrayIndex){
+        LayoutInflater inflater = (LayoutInflater)getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        View newStockRow = inflater.inflate(R.layout.stock_quote_row, null);
+
+        TextView newStockTextView = (TextView) newStockRow.findViewById(R.id.stockSymbolTextView);
+
+        newStockTextView.setText(stock);
+        Button stockQuoteButton = (Button)newStockRow.findViewById(R.id.stockQuoteButton);
+        stockQuoteButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                LinearLayout tableRow = (LinearLayout) view.getParent();
+                TextView textView = (TextView)tableRow.findViewById(R.id.stockSymbolTextView);
+                String stockSymbol = textView.getText().toString();
+                Intent intent = new Intent(MainActivity.this, StockInfoActivity.class);
+                intent.putExtra(STOCK_SYMBOL, stockSymbol);
+                startActivity(intent);
+            }
+        });
+
+        stockTableScrollView.addView(newStockRow, arrayIndex);
+
+    }
+
+
+    private void initializeViews(){
+
+        stockTableScrollView =(LinearLayout) findViewById(R.id.stockScrollView);
+        stockSymbolEditText = (EditText)findViewById(R.id.stockSymbolEditText);
+        getStockSymbolButton = (Button)findViewById(R.id.enterStockSymbolButton);
+        deleteStockSymbolButton = (Button)findViewById(R.id.deleteStockSymbolButton);
+
+    }
+
+    private void deleteAllStocks(){
+        stockTableScrollView.removeAllViews();
     }
 
 
@@ -57,70 +158,5 @@ public class MainActivity extends ActionBarActivity{
 
         return super.onOptionsItemSelected(item);
     }
-    private class myAsyncTask extends AsyncTask<String, String, String>{
 
-        @Override
-        protected String doInBackground(String... strings) {
-            DefaultHttpClient httpClient = new DefaultHttpClient(new BasicHttpParams());
-            HttpPost httpPost = new HttpPost(yahooStockInfo);
-            httpPost.setHeader("Content-type", "application-json");
-            InputStream inputStream = null;
-            String result = null;
-
-            try{
-                HttpResponse response = httpClient.execute(httpPost);
-                HttpEntity entity = response.getEntity();
-                inputStream = entity.getContent();
-                BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, "UTF-8"), 8);
-                StringBuilder theStringBuilder = new StringBuilder();
-                String line = null;
-
-                while ((line=reader.readLine())!=null){
-                    theStringBuilder.append(line+"\n");
-                }
-                result = theStringBuilder.toString();
-            }catch (Exception e){
-                e.printStackTrace();
-            }
-            finally {
-                try{
-                    if(inputStream!=null) inputStream.close();
-                }catch (Exception e){
-                    e.printStackTrace();
-                }
-            }
-            JSONObject jsonObject;
-
-            try{
-
-                //Log.v()
-                jsonObject = new JSONObject(result);
-                JSONObject queryJSONObject = jsonObject.getJSONObject("query");
-                JSONObject resultJSONObject = queryJSONObject.getJSONObject("results");
-                JSONObject quoteJSONObject = resultJSONObject.getJSONObject("quote");
-
-                stockSymbol = quoteJSONObject.getString("symbol");
-                Log.v("Stock Symbol", stockSymbol);
-                stockChange = quoteJSONObject.getString("Change");
-                Log.v("Stock Change", stockChange);
-                stockPrice = quoteJSONObject.getString("LastTradePriceOnly");
-                Log.v("Stock Price", stockPrice);
-            }catch (Exception e ){
-                e.printStackTrace();
-            }
-            return result;
-        }
-
-        @Override
-        protected void onPostExecute(String result) {
-            TextView line1 = (TextView)findViewById(R.id.line1);
-            TextView line2 = (TextView)findViewById(R.id.line2);
-            TextView line3 = (TextView)findViewById(R.id.line3);
-
-            line1.setText("Stock: "+stockSymbol);
-            line2.setText("Last Trade Price: " + stockPrice);
-            line3.setText("Change: "+stockChange);
-
-        }
-    }
 }
