@@ -1,39 +1,73 @@
 package nyc.c4q.syd.updateme;
 
+import android.app.Activity;
+import android.os.AsyncTask;
+import android.os.Handler;
+import android.os.HandlerThread;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
-public class MainActivity extends ActionBarActivity {
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.ExecutionException;
+
+import javax.net.ssl.HttpsURLConnection;
+
+
+/**
+ * Created by July on 6/26/15.
+ */
+public class MainActivity extends Activity implements JobSearchAsync.MyListener {
+    private ArrayList<JobPosition> jobList;
+    private JobCard jobCard;
+    private MainAdapter adapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        //create a list of different card types
+        ArrayList<Card> cards = new ArrayList<Card>();
+        jobList = new ArrayList<JobPosition>();
+
+        JobSearchAsync jobSearchAsync = new JobSearchAsync();
+        jobSearchAsync.setListener(this);
+        jobSearchAsync.execute("java");
+
+        jobCard = new JobCard("Software Developer", "Google", jobList);
+        MapCard mapCard = new MapCard("Map");
+        cards.add(jobCard);
+        cards.add(mapCard);
+//
+        RecyclerView recyclerView = (RecyclerView) findViewById(R.id.recycler_view);
+        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
+        recyclerView.setLayoutManager(linearLayoutManager);
+        adapter = new MainAdapter(this, cards);
+        recyclerView.setAdapter(adapter);
     }
 
-
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_main, menu);
-        return true;
-    }
+    public void onLoadComplete(List<JobPosition> jobs) {
+        Log.d("yuliya", jobs.size() + "");
+        jobCard.setJobArray(jobs);
+        adapter.notifyDataSetChanged();
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
 
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
     }
 }
+
