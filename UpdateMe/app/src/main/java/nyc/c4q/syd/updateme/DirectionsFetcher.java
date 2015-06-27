@@ -2,6 +2,7 @@ package nyc.c4q.syd.updateme;
 
 import android.graphics.Color;
 import android.os.AsyncTask;
+import android.util.Log;
 import android.widget.TextView;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -88,7 +89,7 @@ public class DirectionsFetcher extends AsyncTask<URL, GoogleMap, Void> {
         addPolylineToMap(latLngs);
         System.out.println("Fix Zoom");
         fixZoomForLatLngs(map, latLngs);
-        info.setText("It will take " + time + " to get to your destination. Total distance: " + miles);
+        info.setText("It will take " + time + " to get to " + "" + ". Total distance: " + miles);
     }
 
     public void addPolylineToMap(List<LatLng> latLngs) {
@@ -119,6 +120,7 @@ public class DirectionsFetcher extends AsyncTask<URL, GoogleMap, Void> {
 
     public String readURL() {
         url = url + origin + destination + mode + API_KEY;
+        Log.d("url", url);
 
         StringBuilder builder = new StringBuilder();
         HttpClient client = new DefaultHttpClient();

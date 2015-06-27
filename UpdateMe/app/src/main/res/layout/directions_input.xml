@@ -13,7 +13,7 @@
     <TextView
         android:id="@+id/from_label"
         android:layout_gravity="fill_horizontal"
-        android:text="from"
+        android:text="Home"
         android:textColor="?android:textColorSecondary" />
 
 
@@ -28,7 +28,7 @@
     <TextView
         android:id="@+id/to_label"
         android:layout_gravity="fill_horizontal"
-        android:text="to"
+        android:text="Work"
         android:textColor="?android:textColorSecondary" />
 
 
@@ -39,12 +39,17 @@
         android:layout_gravity="fill_horizontal"
         android:completionThreshold="3" />
 
+    <Spinner
+        android:id="@+id/mode_spinner"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:entries="@array/mode_arrays"/>
 
     <Button
         android:id="@+id/load_directions"
         android:layout_columnSpan="1"
         android:layout_gravity="fill_horizontal"
-        android:text="load directions" />
+        android:text="save" />
 
 
 </GridLayout>

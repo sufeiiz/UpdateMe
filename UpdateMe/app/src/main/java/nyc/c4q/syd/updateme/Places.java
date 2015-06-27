@@ -3,8 +3,9 @@ package nyc.c4q.syd.updateme;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.support.v4.app.FragmentActivity;
+import android.util.Log;
 import android.view.View;
 import android.view.Window;
 import android.widget.ArrayAdapter;
@@ -12,17 +13,7 @@ import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.Filter;
 import android.widget.Filterable;
-
-import com.google.api.client.extensions.android.http.AndroidHttp;
-import com.google.api.client.http.GenericUrl;
-import com.google.api.client.http.HttpRequest;
-import com.google.api.client.http.HttpRequestFactory;
-import com.google.api.client.http.HttpRequestInitializer;
-import com.google.api.client.http.HttpResponse;
-import com.google.api.client.http.HttpTransport;
-import com.google.api.client.json.JsonFactory;
-import com.google.api.client.json.JsonObjectParser;
-import com.google.api.client.json.jackson2.JacksonFactory;
+import android.widget.Spinner;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,50 +21,85 @@ import java.util.List;
 public class Places extends Activity {
 
     private static final String API_KEY = "AIzaSyDTaAeiCfVCXJhdweubPkgIvsni3s1-9ss";
-    private static final HttpTransport HTTP_TRANSPORT = AndroidHttp.newCompatibleTransport();
-    private static final JsonFactory JSON_FACTORY = new JacksonFactory();
     protected static final int RESULT_CODE = 123;
-    private AutoCompleteTextView from;
-    private AutoCompleteTextView to;
-
+    private AutoCompleteTextView home;
+    private AutoCompleteTextView work;
+    private Spinner mode;
+    public static final String PREFS_NAME = "Settings";
+    private final String TAG = "SharedPref";
+    public SharedPreferences preferences = null;
+    private final String HOME = "home";
+    private final String WORK = "work";
+    private final String MODE = "mode";
+    private final String CHANGE = "hasChanged";
+    private String home_address = "";
+    private String work_address = "";
+    private String mode_saved = "";
+    private boolean hasChanged;
 
     @Override
     protected void onCreate(Bundle arg0) {
         super.onCreate(arg0);
         requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
         setContentView(R.layout.directions_input);
+        preferences = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+        loadState();
 
-        //to = (EditText) findViewById(R.id.to);
         Button btnLoadDirections = (Button) findViewById(R.id.load_directions);
-
+        mode = (Spinner) findViewById(R.id.mode_spinner);
+        //TODO does not work?
+        if (mode_saved == "Public Transit")
+            mode.setSelection(1);
+        else if (mode_saved == "Bicycle")
+            mode.setSelection(2);
+        else if (mode_saved == "Walk")
+            mode.setSelection(3);
+        else
+            mode.setSelection(0);
 
         btnLoadDirections.setOnClickListener(new View.OnClickListener() {
 
             @Override
             public void onClick(View v) {
                 Intent data = new Intent();
-                data.putExtra("from", from.getText().toString());
-                data.putExtra("to", to.getText().toString());
+
+                if (home.getText().toString().equals(preferences.getString(HOME, "")) &&
+                        work.getText().toString().equals(preferences.getString(WORK, "")) &&
+                        mode.getSelectedItem().toString().equals(preferences.getString(MODE, "")))
+                    hasChanged = false;
+                else
+                    hasChanged = true;
+
+                Log.d(TAG, "saveState()");
+                SharedPreferences.Editor editor = preferences.edit();
+                editor.putString(HOME, home.getText().toString());
+                editor.putString(WORK, work.getText().toString());
+                editor.putString(MODE, mode.getSelectedItem().toString());
+                editor.putBoolean(CHANGE, hasChanged);
+                editor.apply();
+
                 Places.this.setResult(RESULT_CODE, data);
                 Places.this.finish();
             }
         });
 
+        home = (AutoCompleteTextView) findViewById(R.id.from);
+        work = (AutoCompleteTextView) findViewById(R.id.to);
 
+        home.setText(home_address);
+        work.setText(work_address);
 
-        from = (AutoCompleteTextView) findViewById(R.id.from);
-        to = (AutoCompleteTextView) findViewById(R.id.to);
-
-
-        from.setText("Fisherman's Wharf, San Francisco, CA, United States");
-        to.setText("The Moscone Center, Howard Street, San Francisco, CA, United States");
-
-
-        from.setAdapter(new PlacesAutoCompleteAdapter(this, android.R.layout.simple_dropdown_item_1line));
-        to.setAdapter(new PlacesAutoCompleteAdapter(this, android.R.layout.simple_dropdown_item_1line));
+        home.setAdapter(new PlacesAutoCompleteAdapter(this, android.R.layout.simple_dropdown_item_1line));
+        work.setAdapter(new PlacesAutoCompleteAdapter(this, android.R.layout.simple_dropdown_item_1line));
 
     }
 
+    public void loadState(){
+        Log.d(TAG, "loadState()");
+        home_address = preferences.getString(HOME, "");
+        work_address = preferences.getString(WORK, "");
+        mode_saved = preferences.getString(MODE, "");
+    }
 
     private class PlacesAutoCompleteAdapter extends ArrayAdapter<String> implements Filterable {
         private ArrayList<String> resultList;
@@ -102,9 +128,9 @@ public class Places extends Activity {
                     FilterResults filterResults = new FilterResults();
                     if (constraint != null) {
                         // Retrieve the autocomplete results.
-                        resultList = autocomplete(constraint.toString());
+//                        resultList = autocomplete(constraint.toString());
 
-                        // Assign the data to the FilterResults
+                        // Assign the data the FilterResults
                         filterResults.values = resultList;
                         filterResults.count = resultList.size();
                     }
@@ -127,38 +153,38 @@ public class Places extends Activity {
 
     private static final String PLACES_AUTOCOMPLETE_API = "https://maps.googleapis.com/maps/api/place/autocomplete/json";
 
-    private ArrayList<String> autocomplete(String input) {
+//    private ArrayList<String> autocomplete(String input) {
+//
+//        ArrayList<String> resultList = new ArrayList<String>();
 
-        ArrayList<String> resultList = new ArrayList<String>();
-
-        try {
-
-            HttpRequestFactory requestFactory = HTTP_TRANSPORT.createRequestFactory(new HttpRequestInitializer() {
-                                                                                        @Override
-                                                                                        public void initialize(HttpRequest request) {
-                                                                                            request.setParser(new JsonObjectParser(JSON_FACTORY));
-                                                                                        }
-                                                                                    }
-            );
-
-            GenericUrl url = new GenericUrl(PLACES_AUTOCOMPLETE_API);
-            url.put("input", input);
-            url.put("key", API_KEY);
-            url.put("sensor",false);
-
-            HttpRequest request = requestFactory.buildGetRequest(url);
-            HttpResponse httpResponse = request.execute();
-            PlacesResult directionsResult = httpResponse.parseAs(PlacesResult.class);
-
-            List<Prediction> predictions = directionsResult.predictions;
-            for (Prediction prediction : predictions) {
-                resultList.add(prediction.description);
-            }
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
-        return resultList;
-    }
+//        try {
+//
+//            HttpRequestFactory requestFactory = HTTP_TRANSPORT.createRequestFactory(new HttpRequestInitializer() {
+//                                                                                        @Override
+//                                                                                        public void initialize(HttpRequest request) {
+//                                                                                            request.setParser(new JsonObjectParser(JSON_FACTORY));
+//                                                                                        }
+//                                                                                    }
+//            );
+//
+//            GenericUrl url = new GenericUrl(PLACES_AUTOCOMPLETE_API);
+//            url.put("input", input);
+//            url.put("key", API_KEY);
+//            url.put("sensor",false);
+//
+//            HttpRequest request = requestFactory.buildGetRequest(url);
+//            HttpResponse httpResponse = request.execute();
+//            PlacesResult directionsResult = httpResponse.parseAs(PlacesResult.class);
+//
+//            List<Prediction> predictions = directionsResult.predictions;
+//            for (Prediction prediction : predictions) {
+//                resultList.add(prediction.description);
+//            }
+//        } catch (Exception ex) {
+//            ex.printStackTrace();
+//        }
+//        return resultList;
+//    }
 
     public static class PlacesResult {
 

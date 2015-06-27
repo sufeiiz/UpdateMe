@@ -1,8 +1,11 @@
 package nyc.c4q.syd.updateme;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentSender;
+import android.content.SharedPreferences;
 import android.hardware.Camera;
 import android.location.Location;
 import android.os.Bundle;
@@ -40,22 +43,37 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
     // Define a request code to send to Google Play services
     // This code is returned in Activity.onActivityResult
     private final static int CONNECTION_FAILURE_RESOLUTION_REQUEST = 9000;
+    public static final String PREFS_NAME = "Settings";
+    private final String TAG = "SharedPref";
+    public SharedPreferences preferences = null;
+    public SharedPreferences.Editor editor;
+    private final String HOME = "home";
+    private final String WORK = "work";
+    private final String MODE = "mode";
+    private final String RUN = "rundirection";
+    private String mode;
 
     private GoogleApiClient client;
     private LatLng markerLatLng, locationLatLng;
     private GoogleMap map;
     private Location location;
-    private boolean hasMarker = false;
+    private boolean hasMarker = false, hasSavedAdd = false;
     private Marker mark;
     private LocationRequest mLocationRequest;
     private DirectionsFetcher df;
     private TextView info;
+    private String origin;
+    private String destination;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.cardview);
         setUpMapIfNeeded();
+
+        preferences = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+        editor = preferences.edit();
+        info = (TextView) findViewById(R.id.map_info);
 
         // Connect to Geolocation API to make current location request
         buildGoogleApiClient();
@@ -77,7 +95,28 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
             }
         });
 
-        info = (TextView) findViewById(R.id.map_info);
+
+    }
+
+    public void loadState() {
+        Log.d(TAG, "loadState()");
+
+        // if home is null
+        if (preferences.getString(HOME, "").isEmpty() &&
+                preferences.getString(WORK, "").isEmpty()) {
+            info.setText("Set your destination in Settings ->");
+            hasSavedAdd = false;
+        } else
+            hasSavedAdd = true;
+
+        SharedPreferences.Editor editor = preferences.edit();
+        editor.putBoolean(RUN, hasSavedAdd);
+        editor.apply();
+        preferences.getBoolean(RUN, false);
+        mode = preferences.getString(MODE, "car");
+
+        if (preferences.getBoolean("hasChanged", false))
+            map.clear();
     }
 
     @Override
@@ -101,15 +140,15 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
             }
         });
 
-        new GoogleMap.OnMarkerClickListener() {
+        map.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
             @Override
             public boolean onMarkerClick(Marker marker) {
-                //TODO: directions to and from?
-                return false;
+                markerLatLng = marker.getPosition();
+                markerDialog();
+                return true;
             }
-        };
+        });
     }
-
 
 
     // Override methods for Connection Call Back for Geolocation API
@@ -123,7 +162,8 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
     }
 
     @Override
-    public void onConnectionSuspended(int i) {}
+    public void onConnectionSuspended(int i) {
+    }
 
     @Override
     public void onConnectionFailed(ConnectionResult connectionResult) {
@@ -150,25 +190,37 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
         double latitude = location.getLatitude();
         double longitude = location.getLongitude();
         locationLatLng = new LatLng(latitude, longitude);
-        String origin = latitude + "," + longitude;
+        origin = latitude + "," + longitude;
 
         // Set initial view to current location
-        MarkerOptions options = new MarkerOptions()
-                .position(locationLatLng)
-                .title("I am here!");
-        map.addMarker(options);
         map.moveCamera(CameraUpdateFactory.newLatLng(locationLatLng));
         map.animateCamera(CameraUpdateFactory.zoomTo(18));
-        df = new DirectionsFetcher(info, map, origin, "new+york", "car");
-        df.execute();
+
+        if (hasSavedAdd) {
+            String temp;
+            if (!preferences.getString(HOME, "").isEmpty() && !preferences.getString(WORK, "").isEmpty()) {
+                long time = System.currentTimeMillis();
+                if (time > 43200000)
+                    temp = preferences.getString(HOME, "");
+                else
+                    temp = preferences.getString(WORK, "");
+            } else if (preferences.getString(HOME, "").isEmpty())
+                temp = preferences.getString(WORK, "");
+            else
+                temp = preferences.getString(HOME, "");
+
+            destination = temp.replaceAll(" ", "+");
+            df = new DirectionsFetcher(info, map, origin, destination, mode);
+            df.execute();
+        }
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-
         setUpMapIfNeeded();
         client.connect();
+        loadState();
     }
 
     @Override
@@ -197,31 +249,29 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
     }
 
 
-
-
-
-
-
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_main, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
+    private void markerDialog() {
+        AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this);
+        dialogBuilder.setTitle("Choose an Option:");
+        final String[] items = {"Directions to", "Save as Home", "Save as Work"};
+        dialogBuilder.setItems(items, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                if (items[which].equalsIgnoreCase("Directions to")) {
+                    destination = markerLatLng.latitude + "," + markerLatLng.longitude;
+                    df = new DirectionsFetcher(info, map, origin, destination, mode);
+                    df.execute();
+                } else if (items[which].equalsIgnoreCase("Save as Home")) {
+                    editor.putString(HOME, markerLatLng.latitude + "," + markerLatLng.longitude);
+                    editor.apply();
+                    Toast.makeText(MainActivity.this, "Location has been saved as Home", Toast.LENGTH_LONG).show();
+                } else {
+                    editor.putString(WORK, markerLatLng.latitude + "," + markerLatLng.longitude);
+                    editor.apply();
+                    Toast.makeText(MainActivity.this, "Location has been saved as Home", Toast.LENGTH_LONG).show();
+                }
+            }
+        });
+        AlertDialog alertDialog = dialogBuilder.create();
+        alertDialog.show();
     }
 }
