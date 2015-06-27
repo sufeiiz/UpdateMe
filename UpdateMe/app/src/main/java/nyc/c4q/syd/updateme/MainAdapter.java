@@ -26,6 +26,7 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.UiSettings;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -120,7 +121,7 @@ public class MainAdapter extends RecyclerView.Adapter {
         public void onMapReady(final GoogleMap map) {
 
             map.setMyLocationEnabled(true);
-            //map.moveCamera(CameraUpdateFactory.newLatLngZoom(, 13));
+            map.getUiSettings().setMapToolbarEnabled(true);
 
             // create new marker when map is clicked, manipulated to allow only 1 marker
             map.setOnMapClickListener(new GoogleMap.OnMapClickListener() {

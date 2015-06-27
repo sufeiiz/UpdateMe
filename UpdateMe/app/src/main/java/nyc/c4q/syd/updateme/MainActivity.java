@@ -58,8 +58,6 @@ public class MainActivity extends Activity implements JobSearchAsync.MyListener 
     private MainAdapter adapter;
     private GoogleApiClient client;
 
-
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
