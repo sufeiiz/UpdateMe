@@ -1,5 +1,6 @@
 package nyc.c4q.syd.updateme;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -26,7 +27,7 @@ import com.google.api.client.json.jackson2.JacksonFactory;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Places extends FragmentActivity {
+public class Places extends Activity {
 
     private static final String API_KEY = "AIzaSyDTaAeiCfVCXJhdweubPkgIvsni3s1-9ss";
     private static final HttpTransport HTTP_TRANSPORT = AndroidHttp.newCompatibleTransport();
@@ -53,8 +54,8 @@ public class Places extends FragmentActivity {
                 Intent data = new Intent();
                 data.putExtra("from", from.getText().toString());
                 data.putExtra("to", to.getText().toString());
-                DirectionsInputActivity.this.setResult(RESULT_CODE, data);
-                DirectionsInputActivity.this.finish();
+                Places.this.setResult(RESULT_CODE, data);
+                Places.this.finish();
             }
         });
 
@@ -162,7 +163,7 @@ public class Places extends FragmentActivity {
     public static class PlacesResult {
 
 
-        @Key("predictions")
+        // @Key("predictions")
         public List<Prediction> predictions;
 
 
@@ -170,10 +171,10 @@ public class Places extends FragmentActivity {
 
 
     public static class Prediction {
-        @Key("description")
+        // @Key("description")
         public String description;
 
-        @Key("id")
+        // @Key("id")
         public String id;
 
     }

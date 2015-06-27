@@ -28,7 +28,4 @@ dependencies {
     compile('com.google.maps.android:android-maps-utils:0.3') {
         exclude group: 'com.google.android.gms'
     }
-    compile files('src/main/res/libs/google-http-client-1.20.0.jar')
-    compile files('src/main/res/libs/google-http-client-android-1.20.0.jar')
-    compile files('src/main/res/libs/google-http-client-jackson2-1.20.0.jar')
 }

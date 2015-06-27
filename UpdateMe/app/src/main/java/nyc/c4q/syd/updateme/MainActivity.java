@@ -3,12 +3,16 @@ package nyc.c4q.syd.updateme;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.IntentSender;
+import android.hardware.Camera;
 import android.location.Location;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.Button;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -36,8 +40,6 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
     // Define a request code to send to Google Play services
     // This code is returned in Activity.onActivityResult
     private final static int CONNECTION_FAILURE_RESOLUTION_REQUEST = 9000;
-    // Request code to use when launching the resolution activity
-    private static final int REQUEST_RESOLVE_ERROR = 1001;
 
     private GoogleApiClient client;
     private LatLng markerLatLng, locationLatLng;
@@ -45,10 +47,9 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
     private Location location;
     private boolean hasMarker = false;
     private Marker mark;
-    private final String TAG = "MAP";
     private LocationRequest mLocationRequest;
-    private String DIRECTION_URL = "https://maps.googleapis.com/maps/api/directions/json?";
-
+    private DirectionsFetcher df;
+    private TextView info;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -66,6 +67,17 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
         // Create MapFragment based on map xml
         MapFragment mapFragment = (MapFragment) getFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
+
+        Button button = (Button) findViewById(R.id.change_destination);
+        button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(MainActivity.this, nyc.c4q.syd.updateme.Places.class);
+                startActivity(intent);
+            }
+        });
+
+        info = (TextView) findViewById(R.id.map_info);
     }
 
     @Override
@@ -123,7 +135,7 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
                 e.printStackTrace();
             }
         } else {
-            Log.i(TAG, "Location services connection failed with code " + connectionResult.getErrorCode());
+            Log.i("MAP", "Location services connection failed with code " + connectionResult.getErrorCode());
         }
     }
 
@@ -133,11 +145,12 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
     }
 
     private void handleNewLocation(Location location) {
-        Log.d(TAG, location.toString());
+        Log.d("MAP", location.toString());
 
         double latitude = location.getLatitude();
         double longitude = location.getLongitude();
         locationLatLng = new LatLng(latitude, longitude);
+        String origin = latitude + "," + longitude;
 
         // Set initial view to current location
         MarkerOptions options = new MarkerOptions()
@@ -145,12 +158,15 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
                 .title("I am here!");
         map.addMarker(options);
         map.moveCamera(CameraUpdateFactory.newLatLng(locationLatLng));
+        map.animateCamera(CameraUpdateFactory.zoomTo(18));
+        df = new DirectionsFetcher(info, map, origin, "new+york", "car");
+        df.execute();
     }
-
 
     @Override
     protected void onResume() {
         super.onResume();
+
         setUpMapIfNeeded();
         client.connect();
     }

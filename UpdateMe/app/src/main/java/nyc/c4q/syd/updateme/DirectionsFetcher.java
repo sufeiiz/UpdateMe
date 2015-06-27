@@ -1,25 +1,29 @@
 package nyc.c4q.syd.updateme;
 
-import android.content.Context;
+import android.graphics.Color;
 import android.os.AsyncTask;
+import android.widget.TextView;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
+import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
-import com.google.api.client.extensions.android.http.AndroidHttp;
-import com.google.api.client.http.GenericUrl;
-import com.google.api.client.http.HttpRequest;
-import com.google.api.client.http.HttpRequestFactory;
-import com.google.api.client.http.HttpRequestInitializer;
-import com.google.api.client.http.HttpResponse;
-import com.google.api.client.http.HttpTransport;
-import com.google.api.client.json.JsonFactory;
-import com.google.api.client.json.JsonObjectParser;
-import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.maps.android.PolyUtil;
 
+import org.apache.http.HttpEntity;
+import org.apache.http.StatusLine;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.json.JSONArray;
+import org.json.JSONObject;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
@@ -27,21 +31,24 @@ import java.util.List;
 /**
  * Created by sufeizhao on 6/25/15.
  */
-public class DirectionsFetcher extends AsyncTask<URL, Integer, Void> {
+public class DirectionsFetcher extends AsyncTask<URL, GoogleMap, Void> {
 
-    private static final HttpTransport HTTP_TRANSPORT = AndroidHttp.newCompatibleTransport();
-    private static final JsonFactory JSON_FACTORY = new JacksonFactory();
+    private static final String API_KEY = "&key=AIzaSyDTaAeiCfVCXJhdweubPkgIvsni3s1-9ss";
     private List<LatLng> latLngs = new ArrayList<LatLng>();
-    private String origin, destination;
-    private boolean directionsFetched = false;
+    private String url = "https://maps.googleapis.com/maps/api/directions/json?";
+    private String origin = "origin=";
+    private String destination = "&destination=";
+    private String mode = "&mode=";
+    private String time, miles;
     private GoogleMap map;
-    private Context context;
+    private TextView info;
 
-    public DirectionsFetcher(Context context, GoogleMap map, String origin, String destination) {
-        this.context = context;
+    public DirectionsFetcher(TextView info, GoogleMap map, String origin, String destination, String mode) {
+        this.info = info;
         this.map = map;
-        this.origin = origin;
-        this.destination = destination;
+        this.origin += origin;
+        this.destination += destination;
+        this.mode += mode;
     }
 
     @Override
@@ -51,79 +58,87 @@ public class DirectionsFetcher extends AsyncTask<URL, Integer, Void> {
     }
 
     protected Void doInBackground(URL... urls) {
+        String input = readURL();
+
         try {
-            HttpRequestFactory requestFactory = HTTP_TRANSPORT.createRequestFactory(new HttpRequestInitializer() {
-                @Override
-                public void initialize(HttpRequest request) {
-                    request.setParser(new JsonObjectParser(JSON_FACTORY));
-                }
-            });
+            // read polyline points
+            JSONObject reader = new JSONObject(input);
+            JSONArray routes = reader.getJSONArray("routes");
+            JSONObject list = routes.getJSONObject(0);
+            JSONObject overview = list.getJSONObject("overview_polyline");
+            String points = overview.getString("points");
+            latLngs = PolyUtil.decode(points);
 
-            GenericUrl url = new GenericUrl("http://maps.googleapis.com/maps/api/directions/json");
-            url.put("origin", origin);
-            url.put("destination", destination);
-            url.put("sensor", false);
+            // read time & distance
+            JSONArray legs = list.getJSONArray("legs");
+            JSONObject list2 = legs.getJSONObject(0);
+            JSONObject distance = list2.getJSONObject("distance");
+            miles = distance.getString("text");
+            JSONObject duration = list2.getJSONObject("duration");
+            time = duration.getString("text");
 
-            HttpRequest request = requestFactory.buildGetRequest(url);
-            HttpResponse httpResponse = request.execute();
-            DirectionsResult directionsResult = httpResponse.parseAs(DirectionsResult.class);
-
-            String encodedPoints = directionsResult.routes.get(0).overviewPolyLine.points;
-            latLngs = PolyUtil.decode(encodedPoints);
         } catch (Exception ex) {
             ex.printStackTrace();
         }
         return null;
-
-    }
-
-    protected void onProgressUpdate(Integer... progress) {
     }
 
     protected void onPostExecute(Void result) {
-        directionsFetched = true;
         System.out.println("Adding polyline");
         addPolylineToMap(latLngs);
         System.out.println("Fix Zoom");
         fixZoomForLatLngs(map, latLngs);
-        System.out.println("Start anim");
-    }
-
-    public static class DirectionsResult {
-        // @Key("routes")
-        public List<Route> routes;
-
-    }
-
-    public static class Route {
-        // @Key("overview_polyline")
-        public OverviewPolyLine overviewPolyLine;
-
-    }
-
-    public static class OverviewPolyLine {
-        // @Key("points")
-        public String points;
-
+        info.setText("It will take " + time + " to get to your destination. Total distance: " + miles);
     }
 
     public void addPolylineToMap(List<LatLng> latLngs) {
-        PolylineOptions options = new PolylineOptions();
-        for (LatLng latLng : latLngs) {
+        PolylineOptions options = new PolylineOptions()
+                .width(10)
+                .color(Color.parseColor("#009688"));
+
+        for (LatLng latLng : latLngs)
             options.add(latLng);
-        }
+
         map.addPolyline(options);
+
+        // add marker at destionation
+        LatLng dest = latLngs.get(latLngs.size()-1);
+        map.addMarker(new MarkerOptions().position(dest));
     }
 
-    public static void fixZoomForLatLngs(GoogleMap googleMap, List<LatLng> latLngs) {
+    public static void fixZoomForLatLngs(GoogleMap map, List<LatLng> latLngs) {
         if (latLngs != null && latLngs.size() > 0) {
             LatLngBounds.Builder bc = new LatLngBounds.Builder();
 
-            for (LatLng latLng : latLngs) {
+            for (LatLng latLng : latLngs)
                 bc.include(latLng);
-            }
 
-            googleMap.animateCamera(CameraUpdateFactory.newLatLngBounds(bc.build(), 50), 4000, null);
+            map.animateCamera(CameraUpdateFactory.newLatLngBounds(bc.build(), 50));
         }
+    }
+
+    public String readURL() {
+        url = url + origin + destination + mode + API_KEY;
+
+        StringBuilder builder = new StringBuilder();
+        HttpClient client = new DefaultHttpClient();
+        HttpGet httpGet = new HttpGet(url);
+        try {
+            org.apache.http.HttpResponse response = client.execute(httpGet);
+            StatusLine statusLine = response.getStatusLine();
+            int statusCode = statusLine.getStatusCode();
+            if (statusCode == 200) {
+                HttpEntity entity = response.getEntity();
+                InputStream content = entity.getContent();
+                BufferedReader reader = new BufferedReader(new InputStreamReader(content));
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    builder.append(line);
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return builder.toString();
     }
 }
