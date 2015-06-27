@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -14,6 +15,7 @@ import android.widget.Button;
 import android.widget.Filter;
 import android.widget.Filterable;
 import android.widget.Spinner;
+import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -47,15 +49,21 @@ public class Places extends Activity {
 
         Button btnLoadDirections = (Button) findViewById(R.id.load_directions);
         mode = (Spinner) findViewById(R.id.mode_spinner);
-        //TODO does not work?
-        if (mode_saved == "Public Transit")
-            mode.setSelection(1);
-        else if (mode_saved == "Bicycle")
-            mode.setSelection(2);
-        else if (mode_saved == "Walk")
-            mode.setSelection(3);
-        else
-            mode.setSelection(0);
+
+        switch (mode_saved) {
+            case "Transit":
+                mode.setSelection(1);
+                break;
+            case "Bicycling":
+                mode.setSelection(2);
+                break;
+            case "Walking":
+                mode.setSelection(3);
+                break;
+            default:
+                mode.setSelection(0);
+                break;
+        }
 
         btnLoadDirections.setOnClickListener(new View.OnClickListener() {
 
