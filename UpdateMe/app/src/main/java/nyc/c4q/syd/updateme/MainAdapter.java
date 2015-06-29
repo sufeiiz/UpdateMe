@@ -1,7 +1,11 @@
 package nyc.c4q.syd.updateme;
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.IntentSender;
+import android.content.SharedPreferences;
 import android.location.Location;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
@@ -15,6 +19,7 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -40,18 +45,6 @@ import java.util.List;
 public class MainAdapter extends RecyclerView.Adapter {
     private List<Card> cardsArray;
     private Context context;
-
-    // MAP VARIABLES
-    private final static int CONNECTION_FAILURE_RESOLUTION_REQUEST = 9000;
-    private GoogleApiClient client;
-    private LatLng markerLatLng, locationLatLng;
-    private GoogleMap map;
-    private Location location;
-    private boolean hasMarker = false;
-    private Marker mark;
-    private LocationRequest mLocationRequest;
-    private DirectionsFetcher df;
-    private TextView info;
 
     public MainAdapter(Context context, List<Card> cardsArray) {
         this.context = context;
@@ -92,8 +85,28 @@ public class MainAdapter extends RecyclerView.Adapter {
     public class MapViewHolder extends RecyclerView.ViewHolder implements OnMapReadyCallback,
             GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener {
 
+        private GoogleApiClient client;
+        private static final String PREFS_NAME = "Settings";
+        private final static int CONNECTION_FAILURE_RESOLUTION_REQUEST = 9000;
+        private final String TAG = "SharedPref";
+        private final String HOME = "home", WORK = "work", MODE = "mode", RUN = "rundirection";
+        public SharedPreferences preferences = null;
+        public SharedPreferences.Editor editor;
+        private String mode, origin, destination;
+        private LatLng markerLatLng, locationLatLng;
+        private GoogleMap map;
+        private Location location;
+        private boolean hasMarker = false, hasSavedAdd = false;
+        private Marker mark;
+        private LocationRequest mLocationRequest;
+        private DirectionsFetcher df;
+        private TextView info;
+
         public MapViewHolder(View v) {
             super(v);
+            preferences = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+            editor = preferences.edit();
+            info = (TextView) v.findViewById(R.id.map_info);
 
             // Connect to Geolocation API to make current location request
             buildGoogleApiClient();
@@ -108,11 +121,11 @@ public class MainAdapter extends RecyclerView.Adapter {
             map = mapFragment.getMap();
 
             Button button = (Button) v.findViewById(R.id.change_destination);
-            info = (TextView) v.findViewById(R.id.map_info);
             button.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    // TODO: PLACES NOT DONE
+                    Intent intent = new Intent(context, MapSettings.class);
+                    context.startActivity(intent);
                 }
             });
         }
@@ -138,13 +151,14 @@ public class MainAdapter extends RecyclerView.Adapter {
                 }
             });
 
-            new GoogleMap.OnMarkerClickListener() {
+            map.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
                 @Override
                 public boolean onMarkerClick(Marker marker) {
-                    //TODO: directions to and from?
-                    return false;
+                    markerLatLng = marker.getPosition();
+                    markerDialog();
+                    return true;
                 }
-            };
+            });
         }
 
         // Override methods for Connection Call Back for Geolocation API
@@ -183,24 +197,51 @@ public class MainAdapter extends RecyclerView.Adapter {
             double latitude = location.getLatitude();
             double longitude = location.getLongitude();
             locationLatLng = new LatLng(latitude, longitude);
-            String origin = latitude + "," + longitude;
+            origin = latitude + "," + longitude;
 
             // Set initial view to current location
-            MarkerOptions options = new MarkerOptions()
-                    .position(locationLatLng)
-                    .title("I am here!");
-            System.out.println("map: " + map);
-            map.addMarker(options);
             map.moveCamera(CameraUpdateFactory.newLatLng(locationLatLng));
             map.animateCamera(CameraUpdateFactory.zoomTo(18));
-            df = new DirectionsFetcher(info, map, origin, "new+york", "car");
-            df.execute();
+
+            if (hasSavedAdd) {
+                String temp;
+                if (!preferences.getString(HOME, "").isEmpty() && !preferences.getString(WORK, "").isEmpty()) {
+                    long time = System.currentTimeMillis();
+                    if (time > 43200000)
+                        temp = preferences.getString(HOME, "");
+                    else
+                        temp = preferences.getString(WORK, "");
+                } else if (preferences.getString(HOME, "").isEmpty())
+                    temp = preferences.getString(WORK, "");
+                else
+                    temp = preferences.getString(HOME, "");
+
+                destination = temp.replaceAll(" ", "+");
+                df = new DirectionsFetcher(info, map, origin, destination, mode);
+                df.execute();
+            }
         }
 
-        private void setUpMapIfNeeded() {
-            // if map was not already instantiated, try to obtain the map from the MapFragment
-            if (map == null)
-                map = ((MapFragment) ((Activity) context).getFragmentManager().findFragmentById(R.id.map)).getMap();
+        // Load SharedPreference
+        public void loadState() {
+            Log.d(TAG, "loadState()");
+
+            // if home is null
+            if (preferences.getString(HOME, "").isEmpty() &&
+                    preferences.getString(WORK, "").isEmpty()) {
+                info.setText("Set your destination in Settings ->");
+                hasSavedAdd = false;
+            } else
+                hasSavedAdd = true;
+
+            SharedPreferences.Editor editor = preferences.edit();
+            editor.putBoolean(RUN, hasSavedAdd);
+            editor.apply();
+            preferences.getBoolean(RUN, false);
+            mode = preferences.getString(MODE, "car");
+
+            if (preferences.getBoolean("hasChanged", false))
+                map.clear();
         }
 
         protected synchronized void buildGoogleApiClient() {
@@ -212,6 +253,32 @@ public class MainAdapter extends RecyclerView.Adapter {
                     .addApi(Places.PLACE_DETECTION_API)
                     .build();
             client.connect();
+        }
+
+        private void markerDialog() {
+            AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(context);
+            dialogBuilder.setTitle("Choose an Option:");
+            final String[] items = {"Directions to", "Save as Home", "Save as Work"};
+            dialogBuilder.setItems(items, new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    if (items[which].equalsIgnoreCase("Directions to")) {
+                        destination = markerLatLng.latitude + "," + markerLatLng.longitude;
+                        df = new DirectionsFetcher(info, map, origin, destination, mode);
+                        df.execute();
+                    } else if (items[which].equalsIgnoreCase("Save as Home")) {
+                        editor.putString(HOME, markerLatLng.latitude + "," + markerLatLng.longitude);
+                        editor.apply();
+                        Toast.makeText(context, "Location has been saved as Home", Toast.LENGTH_LONG).show();
+                    } else {
+                        editor.putString(WORK, markerLatLng.latitude + "," + markerLatLng.longitude);
+                        editor.apply();
+                        Toast.makeText(context, "Location has been saved as Home", Toast.LENGTH_LONG).show();
+                    }
+                }
+            });
+            AlertDialog alertDialog = dialogBuilder.create();
+            alertDialog.show();
         }
     }
 

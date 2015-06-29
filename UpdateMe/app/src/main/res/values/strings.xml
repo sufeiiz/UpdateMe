@@ -3,4 +3,11 @@
 
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
+
+    <string-array name="mode_arrays">
+        <item>Driving</item>
+        <item>Transit</item>
+        <item>Bicycling</item>
+        <item>Walking</item>
+    </string-array>
 </resources>

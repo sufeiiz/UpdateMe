@@ -32,6 +32,7 @@ import java.util.List;
  * Created by sufeizhao on 6/27/15.
  */
 public class DirectionsFetcher extends AsyncTask<URL, GoogleMap, Void> {
+
     private static final String API_KEY = "&key=AIzaSyDTaAeiCfVCXJhdweubPkgIvsni3s1-9ss";
     private List<LatLng> latLngs = new ArrayList<>();
     private String url = "https://maps.googleapis.com/maps/api/directions/json?";
