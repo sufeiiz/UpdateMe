@@ -9,11 +9,10 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-
 import java.util.List;
 
 /**
- * Created by sufeizhao on 6/30/15.
+ * Created by July on 6/26/15.
  */
 public class JobAdapter extends RecyclerView.Adapter<JobAdapter.ViewHolder> {
     private final Activity mActivity;

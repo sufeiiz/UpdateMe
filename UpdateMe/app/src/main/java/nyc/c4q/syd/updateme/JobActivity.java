@@ -1,15 +1,20 @@
 package nyc.c4q.syd.updateme;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.app.FragmentActivity;
+import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.TextView;
+import android.widget.Toast;
 
-/**
- * Created by sufeizhao on 6/30/15.
- */
+import org.w3c.dom.Text;
+
 public class JobActivity extends FragmentActivity{
+
+
     //eliminate the possibility of toast to appear twice on both sides of the card when there is no job match
     public static int showToast = 3;
 

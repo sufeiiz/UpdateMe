@@ -1,8 +1,17 @@
 package nyc.c4q.syd.updateme;
 
+import android.app.Fragment;
 import android.content.Context;
 import android.os.AsyncTask;
+import android.os.Bundle;
 import android.util.Log;
+import android.view.Gravity;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ImageView;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -22,6 +31,7 @@ import javax.net.ssl.HttpsURLConnection;
  * Created by July on 6/26/15.
  */
 public class JobSearchAsync extends AsyncTask<String, Void, ArrayList<JobPosition>> {
+
     //the base string that will be enlarged bt user input
     private final String defaultString = "https://jobs.github.com/positions.json?description=";
     private ArrayList<JobPosition> arrayJobs;

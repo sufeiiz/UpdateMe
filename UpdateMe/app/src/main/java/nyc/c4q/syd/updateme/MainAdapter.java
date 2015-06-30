@@ -156,9 +156,18 @@ public class MainAdapter extends RecyclerView.Adapter {
 
     /* JOB VIEW */
     public class JobViewHolder extends RecyclerView.ViewHolder {
-        protected TextView title1, title2, title3;
-        protected TextView company1, company2, company3;
-        protected CardView cardView1, cardView2, cardView3;
+        protected TextView title1;
+        protected TextView company1;
+        protected CardView cardView1;
+
+        protected TextView title2;
+        protected TextView company2;
+        protected CardView cardView2;
+
+        protected TextView title3;
+        protected TextView company3;
+        protected CardView cardView3;
+
         protected ImageView info;
 
         public JobViewHolder(View v) {
