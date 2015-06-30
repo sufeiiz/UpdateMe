@@ -1,7 +1,17 @@
 package nyc.c4q.syd.updateme;
 
+import android.app.Fragment;
+import android.content.Context;
 import android.os.AsyncTask;
+import android.os.Bundle;
 import android.util.Log;
+import android.view.Gravity;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ImageView;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -21,8 +31,17 @@ import javax.net.ssl.HttpsURLConnection;
  * Created by July on 6/26/15.
  */
 public class JobSearchAsync extends AsyncTask<String, Void, ArrayList<JobPosition>> {
-    private final String rawString = "https://jobs.github.com/positions.json?description=";
 
+    //the base string that will be enlarged bt user input
+    private final String defaultString = "https://jobs.github.com/positions.json?description=";
+    private ArrayList<JobPosition> arrayJobs;
+    private Context context;
+
+    public JobSearchAsync (Context context){
+        this.context = context;
+    }
+
+    //create a listener interface to know when jobAsync is done loading data
     public interface MyListener {
         void onLoadComplete(List<JobPosition> jobs);
     }
@@ -35,46 +54,33 @@ public class JobSearchAsync extends AsyncTask<String, Void, ArrayList<JobPositio
 
     @Override
     protected ArrayList<JobPosition> doInBackground(String... params) {
-        ArrayList<JobPosition> arrayJobs = new ArrayList<JobPosition>();
-        BufferedReader reader;
-        String line;
+        String line, job;
+        arrayJobs = new ArrayList<>();
 
-
-
-
-        String job = "java";
-        if(null != params && params.length > 0) {
+        //if the user specifies his position and location
+        if (null != params && params.length > 0) {
             job = params[0];
+        } else {
+            //default position when the user doesn't put in anything
+            job = "java";
         }
-
         try {
-            URL urlString = new URL(rawString + job);
+            URL urlString = new URL(defaultString + job);
             HttpsURLConnection connection = (HttpsURLConnection) urlString.openConnection();
             StringBuilder stringBuilder = new StringBuilder();
-            reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+            BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
 
             while ((line = reader.readLine()) != null) {
                 stringBuilder.append(line + "\n");
             }
+            //raw JSON string
             String resultString = stringBuilder.toString();
-
-            if (resultString != null) {
-                try {
-                    JSONArray jsonArray =  new JSONArray(resultString);
-                    for (int i = 0; i < jsonArray.length(); i++) {
-                        JSONObject c = jsonArray.getJSONObject(i);
-                        String title = c.getString("title");
-                        String company = c.getString("company");
-                        String link = c.getString("url");
-                        arrayJobs.add(new JobPosition(title, company, link));
-                    }
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-            }
+            arrayJobs = parseJSON(resultString);
         } catch (MalformedURLException e) {
             e.printStackTrace();
         } catch (IOException e) {
+            e.printStackTrace();
+        } catch (JSONException e) {
             e.printStackTrace();
         }
         return arrayJobs;
@@ -84,8 +90,21 @@ public class JobSearchAsync extends AsyncTask<String, Void, ArrayList<JobPositio
     @Override
     protected void onPostExecute(ArrayList<JobPosition> jobPositions) {
         super.onPostExecute(jobPositions);
-        if(listener != null) {
+        if (listener != null) {
             listener.onLoadComplete(jobPositions);
         }
+    }
+
+    //method to parse JSON
+    public ArrayList<JobPosition> parseJSON(String rawString) throws JSONException {
+        JSONArray jsonArray = new JSONArray(rawString);
+        for (int i = 0; i < jsonArray.length(); i++) {
+            JSONObject c = jsonArray.getJSONObject(i);
+            String title = c.getString("title");
+            String company = c.getString("company");
+            String link = c.getString("url");
+            arrayJobs.add(new JobPosition(title, company, link));
+        }
+        return arrayJobs;
     }
 }
