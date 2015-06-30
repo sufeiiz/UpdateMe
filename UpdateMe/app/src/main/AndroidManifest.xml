@@ -34,9 +34,15 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+<<<<<<< HEAD
         <activity
             android:name=".StockInfoActivity"
             android:label="@string/title_activity_stock_info" >
+=======
+
+        <activity
+            android:name=".JobActivity" >
+>>>>>>> 5da02c754d53d744386cb19050716d720a432166
         </activity>
     </application>
 
