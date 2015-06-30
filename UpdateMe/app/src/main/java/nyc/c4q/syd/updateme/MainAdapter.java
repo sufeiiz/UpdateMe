@@ -1,10 +1,10 @@
 package nyc.c4q.syd.updateme;
+
 import android.app.Activity;
 import android.content.Context;
 import android.content.IntentSender;
 import android.location.Location;
 import android.os.Bundle;
-import android.support.v4.app.FragmentActivity;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -12,10 +12,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
-
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationListener;
@@ -29,8 +27,6 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
-
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -214,6 +210,38 @@ public class MainAdapter extends RecyclerView.Adapter {
         }
     }
 
+    public class StockViewHolder extends RecyclerView.ViewHolder{
+
+        protected TextView stockName1, stockName2, stockName3, stockName4;
+        protected TextView stockPrice1, stockPrice2, stockPrice3, stockPrice4;
+        protected TextView stockChange1, stockChange2, stockChange3, stockChange4;
+        protected CardView cardView1, cardView2, cardView3, cardView4;
+
+        public StockViewHolder(View v) {
+            super(v);
+            stockChange1=(TextView)v.findViewById(R.id.stockChange1);
+            stockChange2=(TextView)v.findViewById(R.id.stockChange2);
+            stockChange3=(TextView)v.findViewById(R.id.stockChange3);
+            stockChange4=(TextView)v.findViewById(R.id.stockChange4);
+
+            stockName1=(TextView)v.findViewById(R.id.stockName1);
+            stockName2=(TextView)v.findViewById(R.id.stockName2);
+            stockName3=(TextView)v.findViewById(R.id.stockName3);
+            stockName4=(TextView)v.findViewById(R.id.stockName4);
+
+            stockPrice1=(TextView)v.findViewById(R.id.stockPrice1);
+            stockPrice2=(TextView)v.findViewById(R.id.stockPrice2);
+            stockPrice3=(TextView)v.findViewById(R.id.stockPrice3);
+            stockPrice4=(TextView)v.findViewById(R.id.stockPrice4);
+
+            cardView1=(CardView)v.findViewById(R.id.stockCardview1);
+            cardView2=(CardView)v.findViewById(R.id.stockCardview2);
+            cardView3=(CardView)v.findViewById(R.id.stockCardview3);
+            cardView4=(CardView)v.findViewById(R.id.stockCardview4);
+        }
+
+    }
+
     //get type of card
     @Override
     public int getItemViewType(int position) {
@@ -231,11 +259,16 @@ public class MainAdapter extends RecyclerView.Adapter {
             View itemView = LayoutInflater.from(parent.getContext()).inflate(R.layout.map_layout, parent, false);
             return new MapViewHolder(itemView);
         }
+        if (viewType == 3) {
+            View itemView = LayoutInflater.from(parent.getContext()).inflate(R.layout.stock_layout, parent, false);
+            return new StockViewHolder(itemView);
+        }
         return null;
     }
 
     @Override
     public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
+
         if (holder.getItemViewType() == 1) {
 
             JobViewHolder jobViewHolder = (JobViewHolder) holder;
@@ -262,6 +295,39 @@ public class MainAdapter extends RecyclerView.Adapter {
         if (holder.getItemViewType() == 2) {
             MapCard mapCard = (MapCard) cardsArray.get(position);
             MapViewHolder mapHolder = (MapViewHolder) holder;
+        }
+
+        if(holder.getItemViewType()==3){
+            StockViewHolder stockViewHolder = (StockViewHolder) holder;
+
+            if(cardsArray != null&&position<cardsArray.size()){
+                StockCard stockCard = (StockCard) cardsArray.get(position);
+                List<StockInfo> stocks = stockCard.getStockArray();
+                if(stocks.size() >0) {
+                    stockViewHolder.stockName1.setText(stocks.get(0).getSymbol());
+                    stockViewHolder.stockPrice1.setText(stocks.get(0).getLastTradePriceOnly());
+                    stockViewHolder.stockChange1.setText(stocks.get(0).getChange());
+                }
+                if(stocks.size()>1) {
+
+                    stockViewHolder.stockName2.setText(stocks.get(1).getSymbol());
+                    stockViewHolder.stockPrice2.setText(stocks.get(1).getLastTradePriceOnly());
+                    stockViewHolder.stockChange2.setText(stocks.get(1).getChange());
+                }
+                if(stocks.size()>2) {
+
+                    stockViewHolder.stockName3.setText(stocks.get(2).getSymbol());
+                    stockViewHolder.stockPrice3.setText(stocks.get(2).getLastTradePriceOnly());
+                    stockViewHolder.stockChange3.setText(stocks.get(2).getChange());
+                }
+                if(stocks.size()>3) {
+
+                    stockViewHolder.stockName4.setText(stocks.get(3).getSymbol());
+                    stockViewHolder.stockChange4.setText(stocks.get(3).getChange());
+                    stockViewHolder.stockPrice4.setText(stocks.get(3).getLastTradePriceOnly());
+                }
+
+            }
         }
     }
 
