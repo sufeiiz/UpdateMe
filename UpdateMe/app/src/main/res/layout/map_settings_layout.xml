@@ -14,21 +14,24 @@
         android:id="@+id/settings_label"
         android:layout_gravity="fill_horizontal"
         android:text="Settings"
-        android:textSize="25dp"
         android:gravity="center_horizontal"
-        android:textColor="#fff" />
+        android:textSize="30sp"
+        android:textColor="#fff"
+        android:textStyle="bold" />
 
     <TextView
         android:id="@+id/from_label"
         android:layout_gravity="fill_horizontal"
-        android:layout_marginTop="15dp"
+        android:layout_marginTop="20dp"
         android:text="Home"
         android:textSize="16dp"
+        android:textStyle="bold"
         android:textColor="#fff" />
 
 
     <AutoCompleteTextView
         android:id="@+id/from"
+        android:layout_marginTop="10dp"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="fill_horizontal"
@@ -38,15 +41,17 @@
 
     <TextView
         android:id="@+id/to_label"
-        android:layout_marginTop="15dp"
+        android:layout_marginTop="20dp"
         android:layout_gravity="fill_horizontal"
         android:text="Work"
+        android:textStyle="bold"
         android:textSize="16dp"
         android:textColor="#fff" />
 
 
     <AutoCompleteTextView
         android:id="@+id/to"
+        android:layout_marginTop="10dp"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="fill_horizontal"
@@ -57,16 +62,16 @@
         android:id="@+id/mode_label"
         android:layout_gravity="fill_horizontal"
         android:text="Mode of Transportation"
-        android:layout_marginTop="15dp"
+        android:layout_marginTop="20dp"
         android:textSize="16dp"
+        android:textStyle="bold"
         android:textColor="#fff" />
 
     <Spinner
         android:id="@+id/mode_spinner"
+        android:layout_marginTop="10dp"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        style="@style/SpinnerTheme"
-        android:entries="@array/mode_arrays"/>
+        android:layout_height="wrap_content"/>
 
     <Button
         android:id="@+id/load_directions"

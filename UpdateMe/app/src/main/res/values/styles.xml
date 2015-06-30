@@ -5,16 +5,9 @@
         <!-- Customize your theme here. -->
     </style>
 
-    <style name="SpinnerTheme" parent="android:Theme">
-        <item name="android:spinnerItemStyle">@style/Spinner</item>
-    </style>
-
-    <style name="Spinner" parent="android:Widget.TextView.SpinnerItem">
-        <item name="android:textAppearance">@style/TextAppearanceSpinnerItem</item>
-    </style>
-
-    <style name="TextAppearanceSpinnerItem" parent="android:TextAppearance.Widget.TextView.SpinnerItem">
-        <item name="android:textColor">#fff</item>
+    <style name="Spinner" parent="Widget.AppCompat.Spinner">
+        <item name="android:background">?android:selectableItemBackground</item>
+        <item name="android:dropDownSelector">?android:selectableItemBackground</item>
     </style>
 
 </resources>

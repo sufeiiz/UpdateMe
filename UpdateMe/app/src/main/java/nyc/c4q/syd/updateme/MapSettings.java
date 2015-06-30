@@ -50,6 +50,8 @@ public class MapSettings extends Activity {
 
         Button btnLoadDirections = (Button) findViewById(R.id.load_directions);
         mode = (Spinner) findViewById(R.id.mode_spinner);
+        ArrayAdapter adapter = ArrayAdapter.createFromResource(this, R.array.mode_arrays, R.id.spinner_text);
+        mode.setAdapter(adapter);
 
         switch (mode_saved) {
             case "Transit":
