@@ -28,9 +28,11 @@
         <ImageButton
             android:id="@+id/change_destination"
             android:layout_width="0dp"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:src="@drawable/ic_action_settings_applications" />
+            android:clickable="true"
+            android:background="@android:color/transparent"
+            android:src="@drawable/ic_settings" />
     </LinearLayout>
 
     <TextView

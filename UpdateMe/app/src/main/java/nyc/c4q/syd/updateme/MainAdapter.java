@@ -81,7 +81,7 @@ public class MainAdapter extends RecyclerView.Adapter {
             if (items.size() == 0)
                 items.add("Add your first to do list now!");
 
-            Button add = (Button) v.findViewById(R.id.add);
+            ImageButton add = (ImageButton) v.findViewById(R.id.add);
             add.setOnClickListener(addTODOListener);
             lvItems.setOnItemLongClickListener(lvItemClickListener);
         }
