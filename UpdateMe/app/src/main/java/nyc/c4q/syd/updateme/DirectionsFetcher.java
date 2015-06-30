@@ -2,6 +2,7 @@ package nyc.c4q.syd.updateme;
 
 import android.graphics.Color;
 import android.os.AsyncTask;
+import android.util.Log;
 import android.widget.TextView;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -59,6 +60,7 @@ public class DirectionsFetcher extends AsyncTask<URL, GoogleMap, Void> {
 
     protected Void doInBackground(URL... urls) {
         String input = readURL();
+        Log.d("Map", "Parsing JSON");
 
         try {
             // read polyline points
@@ -84,9 +86,9 @@ public class DirectionsFetcher extends AsyncTask<URL, GoogleMap, Void> {
     }
 
     protected void onPostExecute(Void result) {
-        System.out.println("Adding polyline");
+        Log.d("Map", "Adding polyline");
         addPolylineToMap(latLngs);
-        System.out.println("Fix Zoom");
+        Log.d("Map", "Fix Zoom");
         fixZoomForLatLngs(map, latLngs);
         info.setText("It will take " + time + " to get to your destination. Total distance: " + miles);
     }

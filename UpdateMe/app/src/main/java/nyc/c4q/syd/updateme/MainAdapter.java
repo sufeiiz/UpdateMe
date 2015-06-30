@@ -1,4 +1,5 @@
 package nyc.c4q.syd.updateme;
+
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
@@ -8,15 +9,19 @@ import android.content.IntentSender;
 import android.content.SharedPreferences;
 import android.location.Location;
 import android.os.Bundle;
-import android.support.v4.app.FragmentActivity;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AbsListView;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.LinearLayout;
+import android.widget.EditText;
+import android.widget.ImageButton;
+import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -31,11 +36,14 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.OnMapReadyCallback;
-import com.google.android.gms.maps.UiSettings;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import org.apache.commons.io.FileUtils;
+
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -51,20 +59,104 @@ public class MainAdapter extends RecyclerView.Adapter {
         this.cardsArray = cardsArray;
     }
 
+    /* TO-DO LIST */
+    public class ToDoViewHolder extends RecyclerView.ViewHolder {
 
-    //create viewHolder for every card
+        private ArrayList<String> items;
+        private ArrayAdapter<String> itemsAdapter;
+        private ListView lvItems;
+
+        public ToDoViewHolder(View v) {
+            super(v);
+
+            lvItems = (ListView) v.findViewById(R.id.list);
+            items = new ArrayList<>();
+            readItems();
+            itemsAdapter = new ArrayAdapter<>(context, android.R.layout.simple_list_item_1, items);
+            lvItems.setAdapter(itemsAdapter);
+            setListViewHeightBasedOnChildren(lvItems);
+            if (items.size() == 0)
+                items.add("Add your first to do list now!");
+
+            Button add = (Button) v.findViewById(R.id.add);
+            add.setOnClickListener(addTODOListener);
+            lvItems.setOnItemLongClickListener(lvItemClickListener);
+        }
+
+        // save and load items from to-do list
+        private void readItems() {
+            File filesDir = context.getFilesDir();
+            File todoFile = new File(filesDir, "todo.txt");
+            try {
+                items = new ArrayList<>(FileUtils.readLines(todoFile));
+            } catch (IOException e) {
+                items = new ArrayList<>();
+            }
+        }
+
+        private void writeItems() {
+            File filesDir = context.getFilesDir();
+            File todoFile = new File(filesDir, "todo.txt");
+            try {
+                FileUtils.writeLines(todoFile, items);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+        // add item to to-do list & adjust view size
+        View.OnClickListener addTODOListener = new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(context);
+                final EditText todoET = new EditText(context);
+                dialogBuilder.setTitle("Add Todo Task Item")
+                        .setMessage("What is on your list today?")
+                        .setView(todoET)
+                        .setPositiveButton("Add Task", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                String itemText = todoET.getText().toString();
+                                items.add(itemText);
+                                setListViewHeightBasedOnChildren(lvItems);
+                            }
+                        });
+                AlertDialog alertDialog = dialogBuilder.create();
+                alertDialog.show();
+                writeItems();
+            }
+        };
+
+        // option to delete item from to-do list
+        // TODO: decrease listview size?
+        AdapterView.OnItemLongClickListener lvItemClickListener = new AdapterView.OnItemLongClickListener() {
+            @Override
+            public boolean onItemLongClick(AdapterView<?> adapter, View item, final int pos, long id) {
+                AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(context);
+                dialogBuilder.setTitle("Remove Task")
+                        .setMessage("Have you completed this task?")
+                        .setNegativeButton("No", null)
+                        .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                items.remove(pos);
+                                itemsAdapter.notifyDataSetChanged();
+                                writeItems();
+                                Toast.makeText(context, "Well done!", Toast.LENGTH_LONG).show();
+                            }
+                        });
+                AlertDialog alertDialog = dialogBuilder.create();
+                alertDialog.show();
+                return true;
+            }
+        };
+    }
+
+    /* JOB VIEW */
     public class JobViewHolder extends RecyclerView.ViewHolder {
-        protected TextView title1;
-        protected TextView company1;
-        protected CardView cardView1;
-
-        protected TextView title2;
-        protected TextView company2;
-        protected CardView cardView2;
-
-        protected TextView title3;
-        protected TextView company3;
-        protected CardView cardView3;
+        protected TextView title1, title2, title3;
+        protected TextView company1, company2, company3;
+        protected CardView cardView1, cardView2, cardView3;
 
         public JobViewHolder(View v) {
             super(v);
@@ -82,13 +174,13 @@ public class MainAdapter extends RecyclerView.Adapter {
         }
     }
 
+    /* GOOGLE MAP*/
     public class MapViewHolder extends RecyclerView.ViewHolder implements OnMapReadyCallback,
             GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener {
 
         private GoogleApiClient client;
         private static final String PREFS_NAME = "Settings";
         private final static int CONNECTION_FAILURE_RESOLUTION_REQUEST = 9000;
-        private final String TAG = "SharedPref";
         private final String HOME = "home", WORK = "work", MODE = "mode", RUN = "rundirection";
         public SharedPreferences preferences = null;
         public SharedPreferences.Editor editor;
@@ -119,46 +211,20 @@ public class MainAdapter extends RecyclerView.Adapter {
             MapFragment mapFragment = (MapFragment) ((Activity) context).getFragmentManager().findFragmentById(R.id.map);
             mapFragment.getMapAsync(this);
             map = mapFragment.getMap();
+            loadState();
 
-            Button button = (Button) v.findViewById(R.id.change_destination);
-            button.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    Intent intent = new Intent(context, MapSettings.class);
-                    context.startActivity(intent);
-                }
-            });
+            ImageButton settings = (ImageButton) v.findViewById(R.id.change_destination);
+            settings.setOnClickListener(settingsListener);
         }
 
         @Override
         public void onMapReady(final GoogleMap map) {
-
-            map.setMyLocationEnabled(true);
             map.getUiSettings().setMapToolbarEnabled(true);
+            map.setMyLocationEnabled(true);
 
             // create new marker when map is clicked, manipulated to allow only 1 marker
-            map.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
-                @Override
-                public void onMapClick(LatLng latLng) {
-                    if (!hasMarker) {
-                        mark = map.addMarker(new MarkerOptions().position(latLng).draggable(true));
-                        hasMarker = true;
-                    } else {
-                        mark.remove();
-                        mark = map.addMarker(new MarkerOptions().position(latLng).draggable(true));
-                    }
-                    markerLatLng = latLng;
-                }
-            });
-
-            map.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
-                @Override
-                public boolean onMarkerClick(Marker marker) {
-                    markerLatLng = marker.getPosition();
-                    markerDialog();
-                    return true;
-                }
-            });
+            map.setOnMapClickListener(createMarkerListener);
+            map.setOnMarkerClickListener(onClickMarkerListner);
         }
 
         // Override methods for Connection Call Back for Geolocation API
@@ -172,20 +238,20 @@ public class MainAdapter extends RecyclerView.Adapter {
         }
 
         @Override
-        public void onConnectionSuspended(int i) {}
-
-        @Override
         public void onConnectionFailed(ConnectionResult connectionResult) {
             if (connectionResult.hasResolution()) {
                 try {
-                    // Start an Activity that tries to resolve the error
                     connectionResult.startResolutionForResult(((Activity) context), CONNECTION_FAILURE_RESOLUTION_REQUEST);
                 } catch (IntentSender.SendIntentException e) {
                     e.printStackTrace();
                 }
             } else {
-                Log.i("MAP", "Location services connection failed with code " + connectionResult.getErrorCode());
+                Log.i("Map", "Location services connection failed with code " + connectionResult.getErrorCode());
             }
+        }
+
+        @Override // must override
+        public void onConnectionSuspended(int i) {
         }
 
         @Override
@@ -201,9 +267,10 @@ public class MainAdapter extends RecyclerView.Adapter {
 
             // Set initial view to current location
             map.moveCamera(CameraUpdateFactory.newLatLng(locationLatLng));
-            map.animateCamera(CameraUpdateFactory.zoomTo(18));
+            map.animateCamera(CameraUpdateFactory.zoomTo(17));
 
             if (hasSavedAdd) {
+                Log.d("Map", "Has Saved Address - loading destination");
                 String temp;
                 if (!preferences.getString(HOME, "").isEmpty() && !preferences.getString(WORK, "").isEmpty()) {
                     long time = System.currentTimeMillis();
@@ -224,7 +291,7 @@ public class MainAdapter extends RecyclerView.Adapter {
 
         // Load SharedPreference
         public void loadState() {
-            Log.d(TAG, "loadState()");
+            Log.d("Map", "loadState()");
 
             // if home is null
             if (preferences.getString(HOME, "").isEmpty() &&
@@ -235,8 +302,7 @@ public class MainAdapter extends RecyclerView.Adapter {
                 hasSavedAdd = true;
 
             SharedPreferences.Editor editor = preferences.edit();
-            editor.putBoolean(RUN, hasSavedAdd);
-            editor.apply();
+            editor.putBoolean(RUN, hasSavedAdd).apply();
             preferences.getBoolean(RUN, false);
             mode = preferences.getString(MODE, "car");
 
@@ -253,33 +319,64 @@ public class MainAdapter extends RecyclerView.Adapter {
                     .addApi(Places.PLACE_DETECTION_API)
                     .build();
             client.connect();
+            Log.d("Map", "Connected to Google API Client");
         }
 
-        private void markerDialog() {
-            AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(context);
-            dialogBuilder.setTitle("Choose an Option:");
-            final String[] items = {"Directions to", "Save as Home", "Save as Work"};
-            dialogBuilder.setItems(items, new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    if (items[which].equalsIgnoreCase("Directions to")) {
-                        destination = markerLatLng.latitude + "," + markerLatLng.longitude;
-                        df = new DirectionsFetcher(info, map, origin, destination, mode);
-                        df.execute();
-                    } else if (items[which].equalsIgnoreCase("Save as Home")) {
-                        editor.putString(HOME, markerLatLng.latitude + "," + markerLatLng.longitude);
-                        editor.apply();
-                        Toast.makeText(context, "Location has been saved as Home", Toast.LENGTH_LONG).show();
-                    } else {
-                        editor.putString(WORK, markerLatLng.latitude + "," + markerLatLng.longitude);
-                        editor.apply();
-                        Toast.makeText(context, "Location has been saved as Home", Toast.LENGTH_LONG).show();
-                    }
+        // start settings activity
+        View.OnClickListener settingsListener = new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(context, MapSettings.class);
+                context.startActivity(intent);
+            }
+        };
+
+        // create new marker and remove old marker
+        GoogleMap.OnMapClickListener createMarkerListener = new GoogleMap.OnMapClickListener() {
+            @Override
+            public void onMapClick(LatLng latLng) {
+                if (!hasMarker) {
+                    mark = map.addMarker(new MarkerOptions().position(latLng).draggable(true));
+                    hasMarker = true;
+                } else {
+                    mark.remove();
+                    mark = map.addMarker(new MarkerOptions().position(latLng).draggable(true));
                 }
-            });
-            AlertDialog alertDialog = dialogBuilder.create();
-            alertDialog.show();
-        }
+                markerLatLng = latLng;
+            }
+        };
+
+        // option to get directions to marker, or save marker in settings
+        GoogleMap.OnMarkerClickListener onClickMarkerListner = new GoogleMap.OnMarkerClickListener() {
+            @Override
+            public boolean onMarkerClick(Marker marker) {
+                markerLatLng = marker.getPosition();
+                AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(context);
+                final String[] items = {"Directions to", "Save as Home", "Save as Work"};
+                dialogBuilder.setTitle("Choose an Option:")
+                        .setItems(items, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                if (items[which].equalsIgnoreCase("Directions to")) {
+                                    destination = markerLatLng.latitude + "," + markerLatLng.longitude;
+                                    df = new DirectionsFetcher(info, map, origin, destination, mode);
+                                    df.execute();
+                                } else if (items[which].equalsIgnoreCase("Save as Home")) {
+                                    editor.putString(HOME, markerLatLng.latitude + "," + markerLatLng.longitude);
+                                    editor.apply();
+                                    Toast.makeText(context, "Location has been saved as Home", Toast.LENGTH_LONG).show();
+                                } else {
+                                    editor.putString(WORK, markerLatLng.latitude + "," + markerLatLng.longitude);
+                                    editor.apply();
+                                    Toast.makeText(context, "Location has been saved as Home", Toast.LENGTH_LONG).show();
+                                }
+                            }
+                        });
+                AlertDialog alertDialog = dialogBuilder.create();
+                alertDialog.show();
+                return true;
+            }
+        };
     }
 
     //get type of card
@@ -291,6 +388,10 @@ public class MainAdapter extends RecyclerView.Adapter {
     //inflate layout for each card
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        if (viewType == 0) {
+            View itemView = LayoutInflater.from(parent.getContext()).inflate(R.layout.todo_layout, parent, false);
+            return new ToDoViewHolder(itemView);
+        }
         if (viewType == 1) {
             View itemView = LayoutInflater.from(parent.getContext()).inflate(R.layout.job_layout, parent, false);
             return new JobViewHolder(itemView);
@@ -304,6 +405,11 @@ public class MainAdapter extends RecyclerView.Adapter {
 
     @Override
     public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
+        if (holder.getItemViewType() == 0) {
+            ToDoCard todoCard = (ToDoCard) cardsArray.get(position);
+            ToDoViewHolder todoHolder = (ToDoViewHolder) holder;
+        }
+
         if (holder.getItemViewType() == 1) {
 
             JobViewHolder jobViewHolder = (JobViewHolder) holder;
@@ -327,6 +433,7 @@ public class MainAdapter extends RecyclerView.Adapter {
             }
 
         }
+
         if (holder.getItemViewType() == 2) {
             MapCard mapCard = (MapCard) cardsArray.get(position);
             MapViewHolder mapHolder = (MapViewHolder) holder;
@@ -337,4 +444,28 @@ public class MainAdapter extends RecyclerView.Adapter {
     public int getItemCount() {
         return cardsArray.size();
     }
+
+    // adjust listview height
+    public static void setListViewHeightBasedOnChildren(ListView listView) {
+        ListAdapter listAdapter = listView.getAdapter();
+        if (listAdapter == null) {
+            // pre-condition
+            return;
+        }
+
+        int totalHeight = listView.getPaddingTop() + listView.getPaddingBottom();
+        for (int i = 0; i < listAdapter.getCount(); i++) {
+            View listItem = listAdapter.getView(i, null, listView);
+            if (listItem instanceof ViewGroup) {
+                listItem.setLayoutParams(new AbsListView.LayoutParams(AbsListView.LayoutParams.WRAP_CONTENT, AbsListView.LayoutParams.WRAP_CONTENT));
+            }
+            listItem.measure(0, 0);
+            totalHeight += listItem.getMeasuredHeight();
+        }
+
+        ViewGroup.LayoutParams params = listView.getLayoutParams();
+        params.height = totalHeight + (listView.getDividerHeight() * (listAdapter.getCount() - 1));
+        listView.setLayoutParams(params);
+    }
+
 }

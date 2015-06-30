@@ -56,7 +56,6 @@ public class MainActivity extends Activity implements JobSearchAsync.MyListener 
     private ArrayList<JobPosition> jobList;
     private JobCard jobCard;
     private MainAdapter adapter;
-    private GoogleApiClient client;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -71,11 +70,13 @@ public class MainActivity extends Activity implements JobSearchAsync.MyListener 
         jobSearchAsync.setListener(this);
         jobSearchAsync.execute("java");
 
+        ToDoCard todoCard = new ToDoCard("Items");
         jobCard = new JobCard("Software Developer", "Google", jobList);
         MapCard mapCard = new MapCard("Map");
+        cards.add(todoCard);
         cards.add(jobCard);
         cards.add(mapCard);
-//
+
         RecyclerView recyclerView = (RecyclerView) findViewById(R.id.recycler_view);
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
         recyclerView.setLayoutManager(linearLayoutManager);
