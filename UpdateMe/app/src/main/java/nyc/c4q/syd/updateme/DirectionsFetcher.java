@@ -104,8 +104,12 @@ public class DirectionsFetcher extends AsyncTask<URL, GoogleMap, Void> {
         map.addPolyline(options);
 
         // add marker at destionation
-        LatLng dest = latLngs.get(latLngs.size()-1);
-        map.addMarker(new MarkerOptions().position(dest));
+        try {
+            LatLng dest = latLngs.get(latLngs.size() - 1);
+            map.addMarker(new MarkerOptions().position(dest));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     public static void fixZoomForLatLngs(GoogleMap map, List<LatLng> latLngs) {

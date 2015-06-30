@@ -4,6 +4,9 @@
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
 
+    <string name="header">Job Positions</string>
+    <string name="no_match">Sorry, your search does not match anything!</string>
+
     <string-array name="mode_arrays">
         <item>Driving</item>
         <item>Transit</item>

@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.content.IntentSender;
 import android.content.SharedPreferences;
 import android.location.Location;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
@@ -21,6 +22,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -53,6 +55,7 @@ import java.util.List;
 public class MainAdapter extends RecyclerView.Adapter {
     private List<Card> cardsArray;
     private Context context;
+    private List<JobPosition> jobs;
 
     public MainAdapter(Context context, List<Card> cardsArray) {
         this.context = context;
@@ -157,20 +160,61 @@ public class MainAdapter extends RecyclerView.Adapter {
         protected TextView title1, title2, title3;
         protected TextView company1, company2, company3;
         protected CardView cardView1, cardView2, cardView3;
+        protected ImageView info;
 
         public JobViewHolder(View v) {
             super(v);
             title1 = (TextView) v.findViewById(R.id.title1);
             company1 = (TextView) v.findViewById(R.id.company1);
             cardView1 = (CardView) v.findViewById(R.id.card_view1);
+            cardView1.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    if (jobs!=null && jobs.size()>0) {
+                        Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(jobs.get(0).getLink()));
+                        context.startActivity(browserIntent);
+                    }
+                }
+            });
 
             title2 = (TextView) v.findViewById(R.id.title2);
             company2 = (TextView) v.findViewById(R.id.company2);
             cardView2 = (CardView) v.findViewById(R.id.card_view2);
+            cardView2.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    if (jobs!=null && jobs.size()>0) {
+                        Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(jobs.get(1).getLink()));
+                        context.startActivity(browserIntent);
+                    }
+                }
+            });
 
             title3 = (TextView) v.findViewById(R.id.title3);
             company3 = (TextView) v.findViewById(R.id.company3);
             cardView3 = (CardView) v.findViewById(R.id.card_view3);
+            cardView3.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    if (jobs!=null && jobs.size()>0) {
+                        Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(jobs.get(2).getLink()));
+                        context.startActivity(browserIntent);
+                    }
+                }
+            });
+
+            info = (ImageView) v.findViewById(R.id.info_icon);
+            info.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    if (jobs!= null && jobs.size()>0) {
+                        Intent intent = new Intent(context, JobActivity.class);
+                        intent.putExtra("jobs", (java.io.Serializable) jobs);
+                        context.startActivity(intent);
+                    }
+                }
+            });
+
         }
     }
 
