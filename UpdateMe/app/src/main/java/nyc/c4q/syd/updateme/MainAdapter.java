@@ -7,6 +7,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
@@ -74,7 +75,7 @@ public class MainAdapter extends RecyclerView.Adapter {
             lvItems = (ListView) v.findViewById(R.id.list);
             items = new ArrayList<>();
             readItems();
-            itemsAdapter = new ArrayAdapter<>(context, android.R.layout.simple_list_item_1, items);
+            itemsAdapter = new ArrayAdapter<>(context, R.layout.todo_textview, items);
             lvItems.setAdapter(itemsAdapter);
             setListViewHeightBasedOnChildren(lvItems);
             if (items.size() == 0)
@@ -82,7 +83,7 @@ public class MainAdapter extends RecyclerView.Adapter {
 
             ImageButton add = (ImageButton) v.findViewById(R.id.add);
             add.setOnClickListener(addTODOListener);
-            lvItems.setOnItemLongClickListener(lvItemClickListener);
+            lvItems.setOnItemClickListener(lvItemClickListener);
         }
 
         // save and load items from to-do list
@@ -130,10 +131,9 @@ public class MainAdapter extends RecyclerView.Adapter {
         };
 
         // option to delete item from to-do list
-        // TODO: decrease listview size?
-        AdapterView.OnItemLongClickListener lvItemClickListener = new AdapterView.OnItemLongClickListener() {
+        AdapterView.OnItemClickListener lvItemClickListener = new AdapterView.OnItemClickListener() {
             @Override
-            public boolean onItemLongClick(AdapterView<?> adapter, View item, final int pos, long id) {
+            public void onItemClick(AdapterView<?> adapter, View item, final int pos, long id) {
                 AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(context);
                 dialogBuilder.setTitle("Remove Task")
                         .setMessage("Have you completed this task?")
@@ -144,12 +144,12 @@ public class MainAdapter extends RecyclerView.Adapter {
                                 items.remove(pos);
                                 itemsAdapter.notifyDataSetChanged();
                                 writeItems();
+                                setListViewHeightBasedOnChildren(lvItems);
                                 Toast.makeText(context, "Well done!", Toast.LENGTH_LONG).show();
                             }
                         });
                 AlertDialog alertDialog = dialogBuilder.create();
                 alertDialog.show();
-                return true;
             }
         };
     }
@@ -178,10 +178,10 @@ public class MainAdapter extends RecyclerView.Adapter {
             cardView1.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    if (jobs!=null && jobs.size()>0) {
-                        Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(jobs.get(0).getLink()));
-                        context.startActivity(browserIntent);
-                    }
+//                    if (jobs!=null && jobs.size()>0) {
+                    Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(jobs.get(0).getLink()));
+                    context.startActivity(browserIntent);
+//                    }
                 }
             });
 
@@ -191,10 +191,10 @@ public class MainAdapter extends RecyclerView.Adapter {
             cardView2.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    if (jobs!=null && jobs.size()>0) {
-                        Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(jobs.get(1).getLink()));
-                        context.startActivity(browserIntent);
-                    }
+//                    if (jobs!=null && jobs.size()>0) {
+                    Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(jobs.get(1).getLink()));
+                    context.startActivity(browserIntent);
+//                    }
                 }
             });
 
@@ -204,10 +204,10 @@ public class MainAdapter extends RecyclerView.Adapter {
             cardView3.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    if (jobs!=null && jobs.size()>0) {
-                        Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(jobs.get(2).getLink()));
-                        context.startActivity(browserIntent);
-                    }
+//                    if (jobs!=null && jobs.size()>0) {
+                    Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(jobs.get(2).getLink()));
+                    context.startActivity(browserIntent);
+//                    }
                 }
             });
 
@@ -215,11 +215,11 @@ public class MainAdapter extends RecyclerView.Adapter {
             info.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    if (jobs!= null && jobs.size()>0) {
-                        Intent intent = new Intent(context, JobActivity.class);
-                        intent.putExtra("jobs", (java.io.Serializable) jobs);
-                        context.startActivity(intent);
-                    }
+//                    if (jobs!= null && jobs.size()>0) {
+                    Intent intent = new Intent(context, JobActivity.class);
+                    intent.putExtra("jobs", (java.io.Serializable) jobs);
+                    context.startActivity(intent);
+//                    }
                 }
             });
 
@@ -341,6 +341,7 @@ public class MainAdapter extends RecyclerView.Adapter {
             }
         }
 
+        //TODO toggle work/home
         // Load SharedPreference
         public void loadState() {
             Log.d("Map", "loadState()");
@@ -348,7 +349,7 @@ public class MainAdapter extends RecyclerView.Adapter {
             // if home is null
             if (preferences.getString(HOME, "").isEmpty() &&
                     preferences.getString(WORK, "").isEmpty()) {
-                info.setText("Set your destination in Settings ->");
+                info.setText("Set your destination in Settings →");
                 hasSavedAdd = false;
             } else
                 hasSavedAdd = true;
@@ -431,6 +432,39 @@ public class MainAdapter extends RecyclerView.Adapter {
         };
     }
 
+    /* STOCK CARD */
+    public class StockViewHolder extends RecyclerView.ViewHolder {
+
+        protected TextView stockName1, stockName2, stockName3, stockName4;
+        protected TextView stockPrice1, stockPrice2, stockPrice3, stockPrice4;
+        protected TextView stockChange1, stockChange2, stockChange3, stockChange4;
+        protected CardView cardView1, cardView2, cardView3, cardView4;
+
+        public StockViewHolder(View v) {
+            super(v);
+            stockChange1 = (TextView) v.findViewById(R.id.stockChange1);
+            stockChange2 = (TextView) v.findViewById(R.id.stockChange2);
+            stockChange3 = (TextView) v.findViewById(R.id.stockChange3);
+            stockChange4 = (TextView) v.findViewById(R.id.stockChange4);
+
+            stockName1 = (TextView) v.findViewById(R.id.stockName1);
+            stockName2 = (TextView) v.findViewById(R.id.stockName2);
+            stockName3 = (TextView) v.findViewById(R.id.stockName3);
+            stockName4 = (TextView) v.findViewById(R.id.stockName4);
+
+            stockPrice1 = (TextView) v.findViewById(R.id.stockPrice1);
+            stockPrice2 = (TextView) v.findViewById(R.id.stockPrice2);
+            stockPrice3 = (TextView) v.findViewById(R.id.stockPrice3);
+            stockPrice4 = (TextView) v.findViewById(R.id.stockPrice4);
+
+            cardView1 = (CardView) v.findViewById(R.id.stockCardview1);
+            cardView2 = (CardView) v.findViewById(R.id.stockCardview2);
+            cardView3 = (CardView) v.findViewById(R.id.stockCardview3);
+            cardView4 = (CardView) v.findViewById(R.id.stockCardview4);
+        }
+
+    }
+
     //get type of card
     @Override
     public int getItemViewType(int position) {
@@ -451,6 +485,10 @@ public class MainAdapter extends RecyclerView.Adapter {
         if (viewType == 2) {
             View itemView = LayoutInflater.from(parent.getContext()).inflate(R.layout.map_layout, parent, false);
             return new MapViewHolder(itemView);
+        }
+        if (viewType == 3) {
+            View itemView = LayoutInflater.from(parent.getContext()).inflate(R.layout.stock_layout, parent, false);
+            return new StockViewHolder(itemView);
         }
         return null;
     }
@@ -490,6 +528,71 @@ public class MainAdapter extends RecyclerView.Adapter {
             MapCard mapCard = (MapCard) cardsArray.get(position);
             MapViewHolder mapHolder = (MapViewHolder) holder;
         }
+
+        if (holder.getItemViewType() == 3) {
+            StockViewHolder stockViewHolder = (StockViewHolder) holder;
+
+            if (cardsArray != null && position < cardsArray.size()) {
+                StockCard stockCard = (StockCard) cardsArray.get(position);
+                List<StockInfo> stocks = stockCard.getStockArray();
+                if (stocks.size() > 0) {
+                    stockViewHolder.stockName1.setText(stocks.get(0).getSymbol());
+                    stockViewHolder.stockPrice1.setText(stocks.get(0).getLastTradePriceOnly());
+                    stockViewHolder.stockChange1.setText(stocks.get(0).getChange());
+                    String str = stocks.get(0).getChange().substring(8);
+                    double changes = Double.parseDouble(str);
+                    if (changes > 0) {
+                        stockViewHolder.stockChange1.setBackgroundColor(Color.GREEN);
+                    }
+                    if (changes < 0) {
+                        stockViewHolder.stockChange1.setBackgroundColor(Color.RED);
+                    }
+                }
+                if (stocks.size() > 1) {
+
+                    stockViewHolder.stockName2.setText(stocks.get(1).getSymbol());
+                    stockViewHolder.stockPrice2.setText(stocks.get(1).getLastTradePriceOnly());
+                    stockViewHolder.stockChange2.setText(stocks.get(1).getChange());
+                    String str = stocks.get(1).getChange().substring(8);
+                    double changes = Double.parseDouble(str);
+                    if (changes > 0) {
+                        stockViewHolder.stockChange2.setBackgroundColor(Color.GREEN);
+                    }
+                    if (changes < 0) {
+                        stockViewHolder.stockChange2.setBackgroundColor(Color.RED);
+                    }
+                }
+                if (stocks.size() > 2) {
+
+                    stockViewHolder.stockName3.setText(stocks.get(2).getSymbol());
+                    stockViewHolder.stockPrice3.setText(stocks.get(2).getLastTradePriceOnly());
+                    stockViewHolder.stockChange3.setText(stocks.get(2).getChange());
+                    String str = stocks.get(2).getChange().substring(8);
+                    double changes = Double.parseDouble(str);
+                    if (changes > 0) {
+                        stockViewHolder.stockChange3.setBackgroundColor(Color.GREEN);
+                    }
+                    if (changes < 0) {
+                        stockViewHolder.stockChange3.setBackgroundColor(Color.RED);
+                    }
+                }
+                if (stocks.size() > 3) {
+
+                    stockViewHolder.stockName4.setText(stocks.get(3).getSymbol());
+                    stockViewHolder.stockChange4.setText(stocks.get(3).getChange());
+                    stockViewHolder.stockPrice4.setText(stocks.get(3).getLastTradePriceOnly());
+                    String str = stocks.get(3).getChange().substring(8);
+                    double changes = Double.parseDouble(str);
+                    if (changes > 0) {
+                        stockViewHolder.stockChange4.setBackgroundColor(Color.GREEN);
+                    }
+                    if (changes < 0) {
+                        stockViewHolder.stockChange4.setBackgroundColor(Color.RED);
+                    }
+                }
+
+            }
+        }
     }
 
     @Override
@@ -497,7 +600,7 @@ public class MainAdapter extends RecyclerView.Adapter {
         return cardsArray.size();
     }
 
-    // adjust listview height
+    // adjust listview height for to-to list
     public static void setListViewHeightBasedOnChildren(ListView listView) {
         ListAdapter listAdapter = listView.getAdapter();
         if (listAdapter == null) {

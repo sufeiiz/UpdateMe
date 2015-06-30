@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:alignmentMode="alignBounds"
-    android:background="#009688"
+    android:background="#4CAF50"
     android:orientation="horizontal"
     android:padding="10dp"
     android:useDefaultMargins="true"
@@ -71,7 +71,8 @@
         android:id="@+id/mode_spinner"
         android:layout_marginTop="10dp"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
+        android:layout_height="wrap_content"
+        android:entries="@array/mode_arrays"/>
 
     <Button
         android:id="@+id/load_directions"
