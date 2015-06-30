@@ -3,6 +3,7 @@
     android:orientation="vertical" android:layout_width="match_parent"
     android:layout_height="match_parent">
 
+<<<<<<< HEAD
     <android.support.v7.widget.RecyclerView
         android:id="@+id/recycler_view"
         android:layout_width="match_parent"
@@ -17,5 +18,8 @@
         android:id="@+id/progress"
         android:layout_alignParentTop="true"
         android:layout_marginTop="178dp"/>
+=======
+   
+>>>>>>> 6cd99098c4b541a9c6627d981388546d777027fb
 
 </RelativeLayout>

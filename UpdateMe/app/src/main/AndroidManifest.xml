@@ -2,7 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="nyc.c4q.syd.updateme" >
 
-    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
@@ -18,11 +18,9 @@
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:theme="@style/AppTheme" >
-
         <meta-data
             android:name="com.google.android.gms.version"
             android:value="@integer/google_play_services_version" />
-
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="AIzaSyDTaAeiCfVCXJhdweubPkgIvsni3s1-9ss" />
@@ -36,11 +34,24 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+<<<<<<< HEAD
 
         <activity android:name=".MapSettings"/>
         
         <activity android:name=".JobActivity" />
 
+=======
+<<<<<<< HEAD
+        <activity
+            android:name=".StockInfoActivity"
+            android:label="@string/title_activity_stock_info" >
+=======
+
+        <activity
+            android:name=".JobActivity" >
+>>>>>>> 5da02c754d53d744386cb19050716d720a432166
+        </activity>
+>>>>>>> 6cd99098c4b541a9c6627d981388546d777027fb
     </application>
 
 </manifest>

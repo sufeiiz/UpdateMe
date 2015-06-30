@@ -2,14 +2,10 @@ package nyc.c4q.syd.updateme;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.content.IntentSender;
-import android.location.Location;
 import android.os.AsyncTask;
-import android.os.Handler;
-import android.os.HandlerThread;
-import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
+<<<<<<< HEAD
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.Menu;
@@ -47,11 +43,14 @@ import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 import javax.net.ssl.HttpsURLConnection;
+=======
+>>>>>>> 6cd99098c4b541a9c6627d981388546d777027fb
 
 
 /**
  * Created by July on 6/26/15.
  */
+<<<<<<< HEAD
 public class MainActivity extends Activity implements JobSearchAsync.MyListener {
 
     private ArrayList<JobPosition> jobList;
@@ -104,5 +103,10 @@ public class MainActivity extends Activity implements JobSearchAsync.MyListener 
         adapter.notifyDataSetChanged();
         progressBar.setVisibility(View.INVISIBLE);
     }
+=======
+public class MainActivity extends Activity {
+
+
+>>>>>>> 6cd99098c4b541a9c6627d981388546d777027fb
 }
 
