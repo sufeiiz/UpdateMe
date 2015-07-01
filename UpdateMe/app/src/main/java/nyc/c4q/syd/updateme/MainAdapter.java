@@ -1,6 +1,7 @@
 package nyc.c4q.syd.updateme;
 
 import android.app.Activity;
+import android.app.AlarmManager;
 import android.app.AlertDialog;
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -167,6 +168,7 @@ public class MainAdapter extends RecyclerView.Adapter {
             public boolean onItemLongClick(AdapterView<?> parent, View view, final int position, long id) {
                 AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(context);
                 final DatePicker setDate = new DatePicker(context);
+                setDate.setSpinnersShown(false);
                 dialogBuilder.setTitle("Set Reminder on Date")
                         .setView(setDate)
                         .setNegativeButton("Cancel", null)
@@ -203,22 +205,15 @@ public class MainAdapter extends RecyclerView.Adapter {
         public void setNotification(String task, int year, int month, int day, int hour, int min) {
             Calendar cal = Calendar.getInstance();
             cal.set(year, month, day);
+            cal.set(Calendar.HOUR_OF_DAY, hour);
+            cal.set(Calendar.MINUTE, min);
             long millis = cal.getTimeInMillis();
 
-            NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-            NotificationCompat.Builder builder = new NotificationCompat.Builder(context);
-            builder.setContentTitle("UpdateMe Reminder")
-                    .setContentText("Todo Task: " + task)
-                    .setSmallIcon(R.mipmap.ic_launcher)
-                    .setAutoCancel(true)
-                    .setWhen(millis)
-                    .setDefaults(Notification.DEFAULT_SOUND | Notification.DEFAULT_VIBRATE);
-
-            Intent resultIntent = new Intent(context, MainActivity.class);
-            PendingIntent.getActivity(context, 0, resultIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-
-            Notification noti = builder.build();
-            notificationManager.notify(0, noti);
+            Intent intent = new Intent(context, AlarmReceiver.class);
+            intent.putExtra("task", task);
+            PendingIntent mAlarmSender = PendingIntent.getBroadcast(context, 0, intent, 0);
+            AlarmManager am = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+            am.set(AlarmManager.RTC_WAKEUP, millis, mAlarmSender);
         }
     }
 
