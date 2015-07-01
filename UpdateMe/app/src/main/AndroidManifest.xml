@@ -41,6 +41,8 @@
         
         <activity android:name=".JobActivity" />
 
+        <activity android:name=".StockInfoActivity" />
+
     </application>
 
 </manifest>

@@ -7,7 +7,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.content.SharedPreferences;
-import android.graphics.Color;
 import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
@@ -308,6 +307,7 @@ public class MainAdapter extends RecyclerView.Adapter {
             }
         }
 
+
         @Override // must override
         public void onConnectionSuspended(int i) {
         }
@@ -441,36 +441,108 @@ public class MainAdapter extends RecyclerView.Adapter {
     /* STOCK CARD */
     public class StockViewHolder extends RecyclerView.ViewHolder {
 
-        protected TextView stockName1, stockName2, stockName3, stockName4;
-        protected TextView stockPrice1, stockPrice2, stockPrice3, stockPrice4;
-        protected TextView stockChange1, stockChange2, stockChange3, stockChange4;
-        protected CardView cardView1, cardView2, cardView3, cardView4;
+        private ArrayList<String> stocks;
+        private ArrayAdapter<String> stockAdapter;
+        private ListView lvStocks;
 
         public StockViewHolder(View v) {
             super(v);
-            stockChange1 = (TextView) v.findViewById(R.id.stockChange1);
-            stockChange2 = (TextView) v.findViewById(R.id.stockChange2);
-            stockChange3 = (TextView) v.findViewById(R.id.stockChange3);
-            stockChange4 = (TextView) v.findViewById(R.id.stockChange4);
 
-            stockName1 = (TextView) v.findViewById(R.id.stockName1);
-            stockName2 = (TextView) v.findViewById(R.id.stockName2);
-            stockName3 = (TextView) v.findViewById(R.id.stockName3);
-            stockName4 = (TextView) v.findViewById(R.id.stockName4);
+            lvStocks = (ListView) v.findViewById(R.id.stockList);
+            stocks = new ArrayList<>();
+            readItems();
+            stockAdapter = new ArrayAdapter<>(context, R.layout.stock_textview, stocks);
+            lvStocks.setAdapter(stockAdapter);
+            setListViewHeightBasedOnChildren(lvStocks);
+            if (stocks.size() == 0)
+                stocks.add("MSFT");
 
-            stockPrice1 = (TextView) v.findViewById(R.id.stockPrice1);
-            stockPrice2 = (TextView) v.findViewById(R.id.stockPrice2);
-            stockPrice3 = (TextView) v.findViewById(R.id.stockPrice3);
-            stockPrice4 = (TextView) v.findViewById(R.id.stockPrice4);
-
-            cardView1 = (CardView) v.findViewById(R.id.stockCardview1);
-            cardView2 = (CardView) v.findViewById(R.id.stockCardview2);
-            cardView3 = (CardView) v.findViewById(R.id.stockCardview3);
-            cardView4 = (CardView) v.findViewById(R.id.stockCardview4);
+            ImageButton addStock = (ImageButton) v.findViewById(R.id.addStock);
+            addStock.setOnClickListener(addStockListener);
+            lvStocks.setOnItemClickListener(lvItemClickListener);
+            lvStocks.setOnItemLongClickListener(lvItemLongClickListener);
         }
 
-    }
+        // save and load items from stock list
+        private void readItems() {
+            File filesDir = context.getFilesDir();
+            File todoFile = new File(filesDir, "stock.txt");
+            try {
+                stocks = new ArrayList<>(FileUtils.readLines(todoFile));
+            } catch (IOException e) {
+                stocks = new ArrayList<>();
+            }
+        }
 
+        private void writeItems() {
+            File filesDir = context.getFilesDir();
+            File todoFile = new File(filesDir, "stock.txt");
+            try {
+                FileUtils.writeLines(todoFile, stocks);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+        // add item to stock list & adjust view size
+        View.OnClickListener addStockListener = new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(context);
+                final EditText todoET = new EditText(context);
+                dialogBuilder.setTitle("Enter Stock")
+                        .setMessage("Which stock would you like to add today?")
+                        .setView(todoET)
+                        .setPositiveButton("Add Stock", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                String itemText = todoET.getText().toString().toUpperCase();
+                                stocks.add(itemText);
+                                setListViewHeightBasedOnChildren(lvStocks);
+                            }
+                        });
+                AlertDialog alertDialog = dialogBuilder.create();
+                alertDialog.show();
+                writeItems();
+            }
+        };
+
+
+        AdapterView.OnItemClickListener lvItemClickListener = new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapter, View item, final int pos, long id) {
+                String stockSymbol = stocks.get(pos);
+                Intent i = new Intent(context, StockInfoActivity.class);
+                i.putExtra("stock", stockSymbol);
+                context.startActivity(i);
+            }
+        };
+
+        // option to delete item from stock list
+        AdapterView.OnItemLongClickListener lvItemLongClickListener = new AdapterView.OnItemLongClickListener() {
+            @Override
+            public boolean onItemLongClick(AdapterView<?> adapterView, View view, int i, long l) {
+                AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(context);
+                dialogBuilder.setTitle("Remove Stock")
+                        .setMessage("Are you sure?")
+                        .setNegativeButton("No", null)
+                        .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                stocks.remove(i);
+                                stockAdapter.notifyDataSetChanged();
+                                writeItems();
+                                setListViewHeightBasedOnChildren(lvStocks);
+                                Toast.makeText(context, "Stock removed!", Toast.LENGTH_LONG).show();
+                            }
+                        });
+                AlertDialog alertDialog = dialogBuilder.create();
+                alertDialog.show();
+
+                return false;
+            }
+        };
+    }
     //get type of card
     @Override
     public int getItemViewType(int position) {
@@ -536,68 +608,9 @@ public class MainAdapter extends RecyclerView.Adapter {
         }
 
         if (holder.getItemViewType() == 3) {
+            StockCard stockCard = (StockCard) cardsArray.get(position);
             StockViewHolder stockViewHolder = (StockViewHolder) holder;
 
-            if (cardsArray != null && position < cardsArray.size()) {
-                StockCard stockCard = (StockCard) cardsArray.get(position);
-                List<StockInfo> stocks = stockCard.getStockArray();
-                if (stocks.size() > 0) {
-                    stockViewHolder.stockName1.setText(stocks.get(0).getSymbol());
-                    stockViewHolder.stockPrice1.setText(stocks.get(0).getLastTradePriceOnly());
-                    stockViewHolder.stockChange1.setText(stocks.get(0).getChange());
-                    String str = stocks.get(0).getChange().substring(8);
-                    double changes = Double.parseDouble(str);
-                    if (changes > 0) {
-                        stockViewHolder.stockChange1.setBackgroundColor(Color.GREEN);
-                    }
-                    if (changes < 0) {
-                        stockViewHolder.stockChange1.setBackgroundColor(Color.RED);
-                    }
-                }
-                if (stocks.size() > 1) {
-
-                    stockViewHolder.stockName2.setText(stocks.get(1).getSymbol());
-                    stockViewHolder.stockPrice2.setText(stocks.get(1).getLastTradePriceOnly());
-                    stockViewHolder.stockChange2.setText(stocks.get(1).getChange());
-                    String str = stocks.get(1).getChange().substring(8);
-                    double changes = Double.parseDouble(str);
-                    if (changes > 0) {
-                        stockViewHolder.stockChange2.setBackgroundColor(Color.GREEN);
-                    }
-                    if (changes < 0) {
-                        stockViewHolder.stockChange2.setBackgroundColor(Color.RED);
-                    }
-                }
-                if (stocks.size() > 2) {
-
-                    stockViewHolder.stockName3.setText(stocks.get(2).getSymbol());
-                    stockViewHolder.stockPrice3.setText(stocks.get(2).getLastTradePriceOnly());
-                    stockViewHolder.stockChange3.setText(stocks.get(2).getChange());
-                    String str = stocks.get(2).getChange().substring(8);
-                    double changes = Double.parseDouble(str);
-                    if (changes > 0) {
-                        stockViewHolder.stockChange3.setBackgroundColor(Color.GREEN);
-                    }
-                    if (changes < 0) {
-                        stockViewHolder.stockChange3.setBackgroundColor(Color.RED);
-                    }
-                }
-                if (stocks.size() > 3) {
-
-                    stockViewHolder.stockName4.setText(stocks.get(3).getSymbol());
-                    stockViewHolder.stockChange4.setText(stocks.get(3).getChange());
-                    stockViewHolder.stockPrice4.setText(stocks.get(3).getLastTradePriceOnly());
-                    String str = stocks.get(3).getChange().substring(8);
-                    double changes = Double.parseDouble(str);
-                    if (changes > 0) {
-                        stockViewHolder.stockChange4.setBackgroundColor(Color.GREEN);
-                    }
-                    if (changes < 0) {
-                        stockViewHolder.stockChange4.setBackgroundColor(Color.RED);
-                    }
-                }
-
-            }
         }
     }
 
