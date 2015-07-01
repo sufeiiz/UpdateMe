@@ -51,8 +51,8 @@ public class FrontFragment extends Fragment implements JobSearchAsync.MyListener
         if (getView() == null || isDetached()) return;
         progressBar.setVisibility(View.INVISIBLE);
 
-        if (jobs.size()==0 && JobActivity.showToast%2!=0) {
-            showCustomToast();
+        if (jobs.size()==0 && JobActivity.showToast%2!=0 && !MainActivity.notConnected) {
+                showCustomToast();
         }
 
         RecyclerView mRecyclerView = (RecyclerView) getView().findViewById(R.id.recycler_view);

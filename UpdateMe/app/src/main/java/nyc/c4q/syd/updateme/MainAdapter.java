@@ -178,10 +178,10 @@ public class MainAdapter extends RecyclerView.Adapter {
             cardView1.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-//                    if (jobs!=null && jobs.size()>0) {
+                    if (jobs!=null && jobs.size()>0 && !MainActivity.notConnected) {
                     Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(jobs.get(0).getLink()));
                     context.startActivity(browserIntent);
-//                    }
+                    }
                 }
             });
 
@@ -191,10 +191,10 @@ public class MainAdapter extends RecyclerView.Adapter {
             cardView2.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-//                    if (jobs!=null && jobs.size()>0) {
+                    if (jobs!=null && jobs.size()>0 && !MainActivity.notConnected) {
                     Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(jobs.get(1).getLink()));
                     context.startActivity(browserIntent);
-//                    }
+                    }
                 }
             });
 
@@ -204,10 +204,10 @@ public class MainAdapter extends RecyclerView.Adapter {
             cardView3.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-//                    if (jobs!=null && jobs.size()>0) {
+                    if (jobs!=null && jobs.size()>0 && !MainActivity.notConnected) {
                     Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(jobs.get(2).getLink()));
                     context.startActivity(browserIntent);
-//                    }
+                    }
                 }
             });
 
@@ -215,11 +215,9 @@ public class MainAdapter extends RecyclerView.Adapter {
             info.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-//                    if (jobs!= null && jobs.size()>0) {
                     Intent intent = new Intent(context, JobActivity.class);
-                    intent.putExtra("jobs", (java.io.Serializable) jobs);
                     context.startActivity(intent);
-//                    }
+
                 }
             });
 
@@ -506,7 +504,7 @@ public class MainAdapter extends RecyclerView.Adapter {
             if (cardsArray != null && position < cardsArray.size()) {
                 JobCard jobCard = (JobCard) cardsArray.get(position);
 
-                List<JobPosition> jobs = jobCard.getJobArray();
+                jobs = jobCard.getJobArray();
                 if (jobs.size() > 0) {
                     jobViewHolder.title1.setText("" + jobs.get(0).getTitle());
                     jobViewHolder.company1.setText("" + jobs.get(0).getCompany());
