@@ -36,6 +36,7 @@ import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.places.Places;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.GoogleMapOptions;
 import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.LatLng;
@@ -271,6 +272,13 @@ public class MainAdapter extends RecyclerView.Adapter {
         public void onMapReady(final GoogleMap map) {
             map.getUiSettings().setMapToolbarEnabled(true);
             map.setMyLocationEnabled(true);
+            map.setMapType(GoogleMap.MAP_TYPE_NORMAL);
+            GoogleMapOptions options = new GoogleMapOptions();
+            options.compassEnabled(true);
+            options.rotateGesturesEnabled(true);
+            options.scrollGesturesEnabled(true);
+            options.tiltGesturesEnabled(true);
+            options.mapToolbarEnabled(true);
 
             // create new marker when map is clicked, manipulated to allow only 1 marker
             map.setOnMapClickListener(createMarkerListener);
