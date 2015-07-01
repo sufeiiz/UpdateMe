@@ -9,10 +9,6 @@ import android.widget.ProgressBar;
 import java.util.ArrayList;
 import java.util.List;
 
-
-/**
- * Created by July on 6/26/15.
- */
 public class MainActivity extends Activity implements JobSearchAsync.MyListener {
 
     private ArrayList<JobPosition> jobList;
