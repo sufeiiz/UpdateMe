@@ -1,12 +1,13 @@
 package nyc.c4q.syd.updateme;
 
 import android.content.Intent;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuItem;
+import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
 
 import org.w3c.dom.Document;
@@ -40,7 +41,7 @@ public class StockInfoActivity extends ActionBarActivity {
     static final String KEY_DAYS_HIGH = "DaysHigh";
     static final String KEY_PRICE = "LastTradePriceOnly";
     static final String KEY_CHANGE = "Change";
-    static final String KEY_DAYS_RANGE = "DaysRange";
+    static final String KEY_DAYS_RANGE = "Volume";
     String daysLow = "";
     String daysHigh = "";
     String yearLow = "";
@@ -49,6 +50,7 @@ public class StockInfoActivity extends ActionBarActivity {
     String lastTradePriceOnly = "";
     String change = "";
     String daysRange = "";
+    Button moreInfoButton;
     String yahooURLFirst = "https://query.yahooapis.com/v1/public/yql?q=select%20*%20from%20yahoo.finance.quote%20where%20symbol%20in%20(%22";
     String yahooURLSecond = "%22)&diagnostics=true&env=store%3A%2F%2Fdatatables.org%2Falltableswithkeys";
 
@@ -57,10 +59,19 @@ public class StockInfoActivity extends ActionBarActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_stock_info);
         Intent i = getIntent();
-        String stockSymbol = "AAPL"; //i.getStringExtra(MainAdapter.StockViewHolder.STOCK_SYMBOL);
+        final String stockSymbol = i.getStringExtra("stock");
         initializeViews();
 
-        Log.d(TAG, "Before URL Creation " + stockSymbol );
+        Log.d(TAG, "Before URL Creation " + stockSymbol);
+        moreInfoButton = (Button)findViewById(R.id.moreInfoButton);
+        moreInfoButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                String stockURL = getString(R.string.yahoo_stock_url) + stockSymbol;
+                Intent getStockWebPage = new Intent(Intent.ACTION_VIEW, Uri.parse(stockURL));
+                startActivity(getStockWebPage);
+            }
+        });
 
         final String yqlURL = yahooURLFirst + stockSymbol +yahooURLSecond;
         new MyAsyncTask().execute(yqlURL);
@@ -127,14 +138,14 @@ public class StockInfoActivity extends ActionBarActivity {
 
         @Override
         protected void onPostExecute(String s) {
-            companyNameTextView.append(name);
-            yearLowTextView.append(yearLow);
-            yearHighTextView.append(yearHigh);
-            daysHighTextView.append(daysHigh);
-            daysLowTextView.append(daysLow);
-            lastTradePriceOnlyTextView.append(lastTradePriceOnly);
-            changeTextView.append(change);
-            daysRangeTextView.append(daysRange);
+            companyNameTextView.setText(name);
+            yearLowTextView.append(" " + yearLow);
+            yearHighTextView.append(" "+yearHigh);
+            daysHighTextView.append(" "+daysHigh);
+            daysLowTextView.append(" "+daysLow);
+            lastTradePriceOnlyTextView.append(" "+lastTradePriceOnly);
+            changeTextView.append(" "+change);
+            daysRangeTextView.append(" "+daysRange);
         }
 
         private StockInfo getStockInformation(Element entry){
