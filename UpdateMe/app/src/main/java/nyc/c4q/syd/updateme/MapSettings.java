@@ -5,15 +5,27 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 import android.view.View;
 import android.view.Window;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.Filter;
 import android.widget.Filterable;
 import android.widget.Spinner;
+import android.widget.Toast;
+
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.PendingResult;
+import com.google.android.gms.common.api.ResultCallback;
+import com.google.android.gms.location.places.PlaceBuffer;
+import com.google.android.gms.location.places.Places;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,9 +34,14 @@ import java.util.Map;
 /**
  * Created by sufeizhao on 6/29/15.
  */
-public class MapSettings extends Activity {
+public class MapSettings extends FragmentActivity implements GoogleApiClient.OnConnectionFailedListener {
+
     private static final String API_KEY = "AIzaSyDTaAeiCfVCXJhdweubPkgIvsni3s1-9ss";
+    private static final LatLngBounds BOUNDS = new LatLngBounds(
+            new LatLng(-34.041458, 150.790100), new LatLng(-33.682247, 151.383362));
+    private PlaceAutocompleteAdapter mAdapter;
     protected static final int RESULT_CODE = 123;
+    private GoogleApiClient client;
     private AutoCompleteTextView home;
     private AutoCompleteTextView work;
     private Spinner mode;
@@ -47,6 +64,11 @@ public class MapSettings extends Activity {
         setContentView(R.layout.map_settings_layout);
         preferences = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
         loadState();
+
+        client = new GoogleApiClient.Builder(this)
+                .enableAutoManage(this, 0, this)
+                .addApi(Places.GEO_DATA_API)
+                .build();
 
         Button btnLoadDirections = (Button) findViewById(R.id.load_directions);
         mode = (Spinner) findViewById(R.id.mode_spinner);
@@ -96,12 +118,15 @@ public class MapSettings extends Activity {
 
         home = (AutoCompleteTextView) findViewById(R.id.from);
         work = (AutoCompleteTextView) findViewById(R.id.to);
+        home.setOnItemClickListener(mAutocompleteClickListener);
 
         home.setText(home_address);
         work.setText(work_address);
 
-        home.setAdapter(new PlacesAutoCompleteAdapter(this, android.R.layout.simple_dropdown_item_1line));
-        work.setAdapter(new PlacesAutoCompleteAdapter(this, android.R.layout.simple_dropdown_item_1line));
+        mAdapter = new PlaceAutocompleteAdapter(this, android.R.layout.simple_list_item_1,
+                client, BOUNDS, null);
+        home.setAdapter(mAdapter);
+        work.setAdapter(mAdapter);
 
     }
 
@@ -112,107 +137,53 @@ public class MapSettings extends Activity {
         mode_saved = preferences.getString(MODE, "");
     }
 
-    private class PlacesAutoCompleteAdapter extends ArrayAdapter<String> implements Filterable {
-        private ArrayList<String> resultList;
-
-        public PlacesAutoCompleteAdapter(Context context, int textViewResourceId) {
-            super(context, textViewResourceId);
-        }
-
+    // Listener that handles selections from suggestions from the AutoCompleteTextView that
+    // displays Place suggestions. Gets the place id of the selected item and issues a request to
+    // the Places Geo Data API to retrieve more details about the place.
+    private AdapterView.OnItemClickListener mAutocompleteClickListener
+            = new AdapterView.OnItemClickListener() {
         @Override
-        public int getCount() {
-            return resultList.size();
+        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+
+            final PlaceAutocompleteAdapter.PlaceAutocomplete item = mAdapter.getItem(position);
+            final String placeId = String.valueOf(item.placeId);
+            Log.i(TAG, "Autocomplete item selected: " + item.description);
+
+            PendingResult<PlaceBuffer> placeResult = Places.GeoDataApi
+                    .getPlaceById(client, placeId);
+            placeResult.setResultCallback(mUpdatePlaceDetailsCallback);
+
+            Toast.makeText(getApplicationContext(), "Clicked: " + item.description,
+                    Toast.LENGTH_SHORT).show();
+            Log.i(TAG, "Called getPlaceById to get Place details for " + item.placeId);
         }
+    };
 
-
+    // Callback for results from a Places Geo Data API query that shows the first place result in
+    // the details view on screen.
+    private ResultCallback<PlaceBuffer> mUpdatePlaceDetailsCallback = new ResultCallback<PlaceBuffer>() {
         @Override
-        public String getItem(int index) {
-            return resultList.get(index);
+        public void onResult(PlaceBuffer places) {
+            if (!places.getStatus().isSuccess()) {
+                // Request did not complete successfully
+                Log.e(TAG, "Place query did not complete. Error: " + places.getStatus().toString());
+                places.release();
+                return;
+            }
+            places.release();
         }
+    };
 
+    // Called when the Activity could not connect to Google Play services and the auto manager
+    // could resolve the error automatically.
+    @Override
+    public void onConnectionFailed(ConnectionResult connectionResult) {
 
-        @Override
-        public Filter getFilter() {
-            Filter filter = new Filter() {
-                @Override
-                protected FilterResults performFiltering(CharSequence constraint) {
-                    FilterResults filterResults = new FilterResults();
-                    if (constraint != null) {
-                        // Retrieve the autocomplete results.
-//                        resultList = autocomplete(constraint.toString());
+        Log.e(TAG, "onConnectionFailed: ConnectionResult.getErrorCode() = " + connectionResult.getErrorCode());
 
-                        // Assign the data the FilterResults
-                        filterResults.values = resultList;
-                        filterResults.count = resultList.size();
-                    }
-                    return filterResults;
-                }
-
-
-                @Override
-                protected void publishResults(CharSequence constraint, FilterResults results) {
-                    if (results != null && results.count > 0) {
-                        notifyDataSetChanged();
-                    }
-                    else {
-                        notifyDataSetInvalidated();
-                    }
-                }};
-            return filter;
-        }
-    }
-
-    private static final String PLACES_AUTOCOMPLETE_API = "https://maps.googleapis.com/maps/api/place/autocomplete/json";
-
-//    private ArrayList<String> autocomplete(String input) {
-//
-//        ArrayList<String> resultList = new ArrayList<String>();
-
-//        try {
-//
-//            HttpRequestFactory requestFactory = HTTP_TRANSPORT.createRequestFactory(new HttpRequestInitializer() {
-//                                                                                        @Override
-//                                                                                        public void initialize(HttpRequest request) {
-//                                                                                            request.setParser(new JsonObjectParser(JSON_FACTORY));
-//                                                                                        }
-//                                                                                    }
-//            );
-//
-//            GenericUrl url = new GenericUrl(PLACES_AUTOCOMPLETE_API);
-//            url.put("input", input);
-//            url.put("key", API_KEY);
-//            url.put("sensor",false);
-//
-//            HttpRequest request = requestFactory.buildGetRequest(url);
-//            HttpResponse httpResponse = request.execute();
-//            PlacesResult directionsResult = httpResponse.parseAs(PlacesResult.class);
-//
-//            List<Prediction> predictions = directionsResult.predictions;
-//            for (Prediction prediction : predictions) {
-//                resultList.add(prediction.description);
-//            }
-//        } catch (Exception ex) {
-//            ex.printStackTrace();
-//        }
-//        return resultList;
-//    }
-
-    public static class PlacesResult {
-
-
-        // @Key("predictions")
-        public List<Prediction> predictions;
-
-
-    }
-
-
-    public static class Prediction {
-        // @Key("description")
-        public String description;
-
-        // @Key("id")
-        public String id;
-
+        // TODO(Developer): Check error code and notify the user of error state and resolution.
+        Toast.makeText(this,
+                "Could not connect to Google API Client: Error " + connectionResult.getErrorCode(),
+                Toast.LENGTH_SHORT).show();
     }
 }
