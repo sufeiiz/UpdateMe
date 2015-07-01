@@ -15,7 +15,6 @@ public class MainActivity extends Activity implements JobSearchAsync.MyListener 
     private JobCard jobCard;
     private MainAdapter adapter;
     private ProgressBar progressBar;
-    public ArrayList<StockInfo> stockList;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -26,15 +25,12 @@ public class MainActivity extends Activity implements JobSearchAsync.MyListener 
         progressBar = (ProgressBar) findViewById(R.id.progress);
         //create a jobList container for data which will get returned from jobAsync
         jobList = new ArrayList<JobPosition>();
-        stockList = new ArrayList<>();
-
-        StockCard stockCard = new StockCard("null", "null", "null", stockList);
+        StockCard stockCard = new StockCard();
         //start jobs JSON parsing and fetching the data for the default java positions
         JobSearchAsync jobSearchAsync = new JobSearchAsync(this);
         jobSearchAsync.setListener(this);
         jobSearchAsync.execute("java");
 
-        new StockInfoAsync(this).execute();
         //create a list of different card types
         ArrayList<Card> cards = new ArrayList<Card>();
         ToDoCard todoCard = new ToDoCard("Items");

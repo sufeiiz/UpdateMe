@@ -1,18 +1,19 @@
 package nyc.c4q.syd.updateme;
 
+import android.content.Context;
 import android.content.Intent;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
-import android.util.Log;
-import android.view.Menu;
-import android.view.MenuItem;
+import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
-
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
-
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -31,7 +32,8 @@ public class StockInfoActivity extends ActionBarActivity {
     TextView daysHighTextView;
     TextView lastTradePriceOnlyTextView;
     TextView changeTextView;
-    TextView daysRangeTextView;
+    TextView volumeTextView;
+    Button moreInfoButton;
     static final String KEY_ITEM = "quote";
     static final String KEY_NAME = "Name";
     static final String KEY_YEAR_LOW = "YearLow";
@@ -40,7 +42,7 @@ public class StockInfoActivity extends ActionBarActivity {
     static final String KEY_DAYS_HIGH = "DaysHigh";
     static final String KEY_PRICE = "LastTradePriceOnly";
     static final String KEY_CHANGE = "Change";
-    static final String KEY_DAYS_RANGE = "DaysRange";
+    static final String KEY_Volume = "Volume";
     String daysLow = "";
     String daysHigh = "";
     String yearLow = "";
@@ -48,7 +50,8 @@ public class StockInfoActivity extends ActionBarActivity {
     String name = "";
     String lastTradePriceOnly = "";
     String change = "";
-    String daysRange = "";
+    String volume = "";
+
     String yahooURLFirst = "https://query.yahooapis.com/v1/public/yql?q=select%20*%20from%20yahoo.finance.quote%20where%20symbol%20in%20(%22";
     String yahooURLSecond = "%22)&diagnostics=true&env=store%3A%2F%2Fdatatables.org%2Falltableswithkeys";
 
@@ -57,13 +60,28 @@ public class StockInfoActivity extends ActionBarActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_stock_info);
         Intent i = getIntent();
-        String stockSymbol = "AAPL"; //i.getStringExtra(MainAdapter.StockViewHolder.STOCK_SYMBOL);
+        final String stockSymbol = i.getStringExtra("Stock");
         initializeViews();
 
-        Log.d(TAG, "Before URL Creation " + stockSymbol );
-
         final String yqlURL = yahooURLFirst + stockSymbol +yahooURLSecond;
-        new MyAsyncTask().execute(yqlURL);
+        if(isOnline()){
+            new MyAsyncTask().execute(yqlURL);
+        }
+
+
+        moreInfoButton = (Button) findViewById(R.id.moreInfoButton);
+        moreInfoButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                if(isOnline()){
+                    String stockURL = getString(R.string.yahoo_stock_url)+stockSymbol;
+                    Intent getMoreInfo = new Intent(Intent.ACTION_VIEW, Uri.parse(stockURL));
+                    startActivity(getMoreInfo);
+                }
+
+            }
+        });
     }
     public void initializeViews(){
         companyNameTextView = (TextView)findViewById(R.id.companyNameTextView);
@@ -73,7 +91,14 @@ public class StockInfoActivity extends ActionBarActivity {
         daysHighTextView=(TextView)findViewById(R.id.daysHighTextView);
         lastTradePriceOnlyTextView =(TextView)findViewById(R.id.lastTradePriceTextView);
         changeTextView=(TextView)findViewById(R.id.changeTextView);
-        daysRangeTextView=(TextView)findViewById(R.id.daysRangeTextView);
+        volumeTextView=(TextView)findViewById(R.id.volumeTextView);
+    }
+
+    public boolean isOnline() {
+        ConnectivityManager cm =
+                (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo netInfo = cm.getActiveNetworkInfo();
+        return netInfo != null && netInfo.isConnectedOrConnecting();
     }
 
     private class MyAsyncTask extends AsyncTask<String, String, String>{
@@ -108,7 +133,7 @@ public class StockInfoActivity extends ActionBarActivity {
                             daysHigh = theStock.getYearHigh();
                             lastTradePriceOnly = theStock.getLastTradePriceOnly();
                             change = theStock.getChange();
-                            daysRange = theStock.getDaysRange();
+                            volume = theStock.getvolume();
                         }
                     }
                 }
@@ -134,7 +159,7 @@ public class StockInfoActivity extends ActionBarActivity {
             daysLowTextView.append(daysLow);
             lastTradePriceOnlyTextView.append(lastTradePriceOnly);
             changeTextView.append(change);
-            daysRangeTextView.append(daysRange);
+            volumeTextView.append("  "+volume);
         }
 
         private StockInfo getStockInformation(Element entry){
@@ -145,7 +170,7 @@ public class StockInfoActivity extends ActionBarActivity {
             String stockDaysLow= getTextValue(entry, KEY_DAYS_LOW);
             String stockLastTradePrice = getTextValue(entry, KEY_PRICE);
             String stockChange= getTextValue(entry, KEY_CHANGE);
-            String stockDaysRage= getTextValue(entry, KEY_DAYS_RANGE);
+            String stockDaysRage= getTextValue(entry, KEY_Volume);
 
             StockInfo theStock = new StockInfo(stockLastTradePrice, stockYearLow, stockYearHigh, stockDaysLow, stockName, stockYearHigh, stockDaysRage, stockChange);
 

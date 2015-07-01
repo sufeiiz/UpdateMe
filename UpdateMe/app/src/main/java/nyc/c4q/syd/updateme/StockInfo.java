@@ -15,7 +15,7 @@ public class StockInfo {
     private String name = "";
     private String lastTradePriceOnly = "";
     private String change = "";
-    private String DaysRange = "";
+    private String volume = "";
 
     public StockInfo(String symbol, String price, String change){
         this.symbol = symbol;
@@ -23,14 +23,14 @@ public class StockInfo {
         this.change = change;
     }
 
-    public StockInfo(String lastTradePriceOnly, String yearLow, String daysHigh, String daysLow, String name, String yearHigh, String daysRange, String change) {
+    public StockInfo(String lastTradePriceOnly, String yearLow, String daysHigh, String daysLow, String name, String yearHigh, String volume, String change) {
         this.lastTradePriceOnly = lastTradePriceOnly;
         this.yearLow = yearLow;
         this.daysHigh = daysHigh;
         this.daysLow = daysLow;
         this.name = name;
-        YearHigh = yearHigh;
-        DaysRange = daysRange;
+        this.YearHigh = yearHigh;
+        this.volume = volume;
         this.change = change;
     }
 
@@ -52,12 +52,12 @@ public class StockInfo {
     }
 
 
-    public String getDaysRange() {
-        return DaysRange;
+    public String getvolume() {
+        return volume;
     }
 
-    public void setDaysRange(String daysRange) {
-        DaysRange = daysRange;
+    public void setvolume(String volume) {
+        this.volume = volume;
     }
 
     public String getChange() {

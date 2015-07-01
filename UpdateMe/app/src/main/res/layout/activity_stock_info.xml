@@ -1,59 +1,126 @@
+<?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools" android:layout_width="wrap_content"
-    android:layout_height="wrap_content" android:paddingLeft="@dimen/activity_horizontal_margin"
-    android:paddingRight="@dimen/activity_horizontal_margin"
-    android:paddingTop="@dimen/activity_vertical_margin"
-    android:paddingBottom="@dimen/activity_vertical_margin"
+    xmlns:card_view="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#4CAF50"
     android:orientation="vertical"
+    android:padding="10dp"
     tools:context="fattyduck.stocktest.StockInfoActivity">
+
     <TextView
         android:id="@+id/companyNameTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/stock_company_name"
-        android:textSize="20sp"/>
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/last_trade_price_only"
-        android:id="@+id/lastTradePriceTextView"
-        android:textSize="20sp"/>
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/changeTextView"
-        android:text="@string/change"
-        android:textSize="20sp"/>
-    <TextView
-        android:id="@+id/daysHighTextView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/stock_days_high"
-        android:textSize="20sp"/>
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/stock_days_low"
-        android:id="@+id/daysLowTextView"
-        android:textSize="20sp"/>
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/yearHighTextView"
-        android:text="@string/stock_year_high"
-        android:textSize="20sp"/>
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/stock_year_low"
-        android:id="@+id/yearLowTextView"
-        android:textSize="20sp"/>
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/daysRangeTextView"
-        android:text="@string/days_range"
-        android:textSize="20sp"/>
+        android:textColor="#fff"
+        android:textSize="30sp"
+        android:textStyle="bold"
+        />
+    <android.support.v7.widget.CardView xmlns:card_view="http://schemas.android.com/apk/res-auto"
+        android:id="@+id/stockCardView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_gravity="center"
+        card_view:cardBackgroundColor="#C8E6C9"
+        card_view:cardCornerRadius="4dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/last_trade_price_only"
+                android:id="@+id/lastTradePriceTextView"
+                android:textColor="#388E3C"
+                android:gravity="center_vertical"
+                android:paddingStart="?android:attr/listPreferredItemPaddingStart"
+                android:paddingEnd="?android:attr/listPreferredItemPaddingEnd"
+                android:minHeight="?android:attr/listPreferredItemHeightSmall"
+                android:textSize="20sp"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/changeTextView"
+                android:text="@string/change"
+                android:textColor="#388E3C"
+                android:gravity="center_vertical"
+                android:paddingStart="?android:attr/listPreferredItemPaddingStart"
+                android:paddingEnd="?android:attr/listPreferredItemPaddingEnd"
+                android:minHeight="?android:attr/listPreferredItemHeightSmall"
+                android:textSize="20sp"/>
+            <TextView
+                android:id="@+id/daysHighTextView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="#388E3C"
+                android:gravity="center_vertical"
+                android:paddingStart="?android:attr/listPreferredItemPaddingStart"
+                android:paddingEnd="?android:attr/listPreferredItemPaddingEnd"
+                android:minHeight="?android:attr/listPreferredItemHeightSmall"
+                android:text="@string/stock_days_high"
+                android:textSize="20sp"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/stock_days_low"
+                android:id="@+id/daysLowTextView"
+                android:textColor="#388E3C"
+                android:gravity="center_vertical"
+                android:paddingStart="?android:attr/listPreferredItemPaddingStart"
+                android:paddingEnd="?android:attr/listPreferredItemPaddingEnd"
+                android:minHeight="?android:attr/listPreferredItemHeightSmall"
+                android:textSize="20sp"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/yearHighTextView"
+                android:text="@string/stock_year_high"
+                android:textColor="#388E3C"
+                android:gravity="center_vertical"
+                android:paddingStart="?android:attr/listPreferredItemPaddingStart"
+                android:paddingEnd="?android:attr/listPreferredItemPaddingEnd"
+                android:minHeight="?android:attr/listPreferredItemHeightSmall"
+                android:textSize="20sp"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/stock_year_low"
+                android:id="@+id/yearLowTextView"
+                android:textColor="#388E3C"
+                android:gravity="center_vertical"
+                android:paddingStart="?android:attr/listPreferredItemPaddingStart"
+                android:paddingEnd="?android:attr/listPreferredItemPaddingEnd"
+                android:minHeight="?android:attr/listPreferredItemHeightSmall"
+                android:textSize="20sp"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/volumeTextView"
+                android:text="@string/volume"
+                android:textColor="#388E3C"
+                android:gravity="center_vertical"
+                android:paddingStart="?android:attr/listPreferredItemPaddingStart"
+                android:paddingEnd="?android:attr/listPreferredItemPaddingEnd"
+                android:minHeight="?android:attr/listPreferredItemHeightSmall"
+                android:textSize="20sp"/>
+
+            <Button
+                android:id="@+id/moreInfoButton"
+                android:layout_marginTop="15dp"
+                android:text="@string/go_to_website"
+                android:layout_width="200dp"
+                android:layout_height="wrap_content"
+                android:background="#4CAF50"
+                android:textSize="20dp"
+                android:textColor="#fff"
+                android:layout_gravity="center_horizontal"/>
+
+        </LinearLayout>
+    </android.support.v7.widget.CardView>
+
 
 
 

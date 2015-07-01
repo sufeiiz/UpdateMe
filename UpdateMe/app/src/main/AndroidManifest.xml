@@ -2,6 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="nyc.c4q.syd.updateme" >
 
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
@@ -40,6 +41,8 @@
         <activity android:name=".MapSettings"/>
         
         <activity android:name=".JobActivity" />
+
+        <activity android:name=".StockInfoActivity" />
 
     </application>
 
