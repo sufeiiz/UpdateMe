@@ -53,15 +53,13 @@
                     android:textSize="16dp"
                     android:textStyle="bold" />
 
-
                 <AutoCompleteTextView
                     android:id="@+id/from"
                     android:layout_width="fill_parent"
                     android:layout_height="wrap_content"
                     android:layout_gravity="fill_horizontal"
                     android:layout_marginTop="10dp"
-                    android:completionThreshold="3"
-                    android:textColor="#388E3C" />
+                    android:completionThreshold="3" />
 
 
                 <TextView
@@ -80,15 +78,13 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="fill_horizontal"
                     android:layout_marginTop="10dp"
-                    android:completionThreshold="3"
-                    android:textColor="#388E3C" />
+                    android:completionThreshold="3"/>
 
                 <TextView
                     android:id="@+id/mode_label"
                     android:layout_gravity="fill_horizontal"
                     android:layout_marginTop="20dp"
                     android:text="Mode of Transportation"
-                    android:textColor="#388E3C"
                     android:textSize="16dp"
                     android:textStyle="bold" />
 

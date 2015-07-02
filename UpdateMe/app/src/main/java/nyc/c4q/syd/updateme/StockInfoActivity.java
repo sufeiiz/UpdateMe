@@ -1,5 +1,6 @@
 package nyc.c4q.syd.updateme;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -22,7 +23,7 @@ import java.net.URLConnection;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
-public class StockInfoActivity extends ActionBarActivity {
+public class StockInfoActivity extends Activity {
 
     private static final String TAG = "STOCKQUOTE";
     TextView companyNameTextView;
