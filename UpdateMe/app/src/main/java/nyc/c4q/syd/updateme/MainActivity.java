@@ -39,13 +39,13 @@ public class MainActivity extends Activity implements JobSearchAsync.MyListener 
         jobList = new ArrayList<JobPosition>();
         stockList = new ArrayList<>();
 
+
         if (!isNetworkConnected()) {
             notConnected = false;
             //start jobs JSON parsing and fetching the data for the default java positions
             JobSearchAsync jobSearchAsync = new JobSearchAsync(this);
             jobSearchAsync.setListener(this);
             jobSearchAsync.execute("java");
-            new StockInfoAsync(this).execute();
         }
 
         else {
@@ -54,13 +54,15 @@ public class MainActivity extends Activity implements JobSearchAsync.MyListener 
             Toast.makeText(this, "Sorry, there is no Internet connection", Toast.LENGTH_LONG).show();
             getDataFromSharedPref();
         }
+        StockCard stockCard = new StockCard();
+
+
         //create a list of different card types
         ArrayList<Card> cards = new ArrayList<Card>();
 
         jobCard = new JobCard(jobList);
         ToDoCard todoCard = new ToDoCard("Items");
         MapCard mapCard = new MapCard("Map");
-        StockCard stockCard = new StockCard("null", "null", "null", stockList);
 
         cards.add(todoCard);
         cards.add(jobCard);
