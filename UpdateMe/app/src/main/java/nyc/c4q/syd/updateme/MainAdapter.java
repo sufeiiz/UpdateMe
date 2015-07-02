@@ -84,7 +84,7 @@ public class MainAdapter extends RecyclerView.Adapter {
             lvItems = (ListView) v.findViewById(R.id.list);
             items = new ArrayList<>();
             readItems();
-            itemsAdapter = new ArrayAdapter<>(context, R.layout.todo_textview, items);
+            itemsAdapter = new ArrayAdapter<>(context, R.layout.todo_list, R.id.text, items);
             lvItems.setAdapter(itemsAdapter);
             setListViewHeightBasedOnChildren(lvItems);
             if (items.size() == 0)
@@ -165,7 +165,7 @@ public class MainAdapter extends RecyclerView.Adapter {
 
         AdapterView.OnItemLongClickListener lvItemLongClickListener = (new AdapterView.OnItemLongClickListener() {
             @Override
-            public boolean onItemLongClick(AdapterView<?> parent, View view, final int position, long id) {
+            public boolean onItemLongClick(final AdapterView<?> parent, final View view, final int position, long id) {
                 AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(context);
                 final DatePicker setDate = new DatePicker(context);
                 setDate.setSpinnersShown(false);
@@ -176,7 +176,8 @@ public class MainAdapter extends RecyclerView.Adapter {
                             @Override
                             public void onClick(DialogInterface dialogInterface, int i) {
                                 notificationDate(items.get(position),
-                                        setDate.getYear(), setDate.getMonth(), setDate.getDayOfMonth());
+                                        setDate.getYear(), setDate.getMonth(), setDate.getDayOfMonth(),
+                                        parent, position);
                             }
                         });
                 AlertDialog alertDialog = dialogBuilder.create();
@@ -185,7 +186,8 @@ public class MainAdapter extends RecyclerView.Adapter {
             }
         });
 
-        public void notificationDate(final String task, final int year, final int month, final int day) {
+        public void notificationDate(final String task, final int year, final int month, final int day,
+                                     final AdapterView<?> parent, final int position) {
             AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(context);
             final TimePicker setTime = new TimePicker(context);
             dialogBuilder.setTitle("Set Reminder at Time")
@@ -196,6 +198,9 @@ public class MainAdapter extends RecyclerView.Adapter {
                         public void onClick(DialogInterface dialogInterface, int i) {
                             setNotification(task, year, month, day,
                                     setTime.getCurrentHour(), setTime.getCurrentMinute());
+                            //TODO: make invisible again?
+                            View image = parent.getChildAt(position);
+                            image.findViewById(R.id.icon).setVisibility(View.VISIBLE);
                         }
                     });
             AlertDialog alertDialog = dialogBuilder.create();
