@@ -49,14 +49,16 @@ public class JobAdapter extends RecyclerView.Adapter<JobAdapter.ViewHolder> {
     //set up the contents for the layout views
     @Override
     public void onBindViewHolder(ViewHolder holder, final int position) {
-        holder.card.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                openUrl(position);
-            }
-        });
-        holder.title.setText(arrayJobs.get(position).getTitle());
-        holder.company.setText(arrayJobs.get(position).getCompany());
+        if (arrayJobs!=null && arrayJobs.size()>0) {
+            holder.card.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    openUrl(position);
+                }
+            });
+            holder.title.setText(arrayJobs.get(position).getTitle());
+            holder.company.setText(arrayJobs.get(position).getCompany());
+        }
     }
 
     // Return the size of the dataset

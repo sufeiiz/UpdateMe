@@ -2,11 +2,11 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#C8E6C9">
+    android:background="#4CAF50">
 
     <android.support.v7.widget.RecyclerView
         android:layout_centerInParent="true"
-        android:id="@+id/recycler_view"
+        android:id="@+id/recycler_view_jobs"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"/>
 
