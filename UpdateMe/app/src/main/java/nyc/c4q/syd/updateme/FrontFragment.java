@@ -51,7 +51,7 @@ public class FrontFragment extends Fragment implements JobSearchAsync.MyListener
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         //when the activity first created the user will get default java job positions
-        fetchData("android");
+        fetchData("java");
     }
 
     //method to populate recycler viw when async task finishes JSON parsing
