@@ -10,6 +10,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.Gravity;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
@@ -28,8 +29,8 @@ import java.util.List;
 public class FrontFragment extends Fragment implements JobSearchAsync.MyListener {
 
     private ProgressBar progressBar;
-    List<JobPosition> js;
-
+    private RecyclerView mRecyclerView;
+    private JobAdapter mAdapter;
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         return inflater.inflate(R.layout.fragment_top, container, false);
@@ -39,31 +40,30 @@ public class FrontFragment extends Fragment implements JobSearchAsync.MyListener
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         progressBar = (ProgressBar) view.findViewById(R.id.progress);
+        mRecyclerView = (RecyclerView) view.findViewById(R.id.recycler_view_jobs);
+        mRecyclerView.setHasFixedSize(true);
+        LinearLayoutManager mLayoutManager = new LinearLayoutManager(getActivity());
+        mRecyclerView.setLayoutManager(mLayoutManager);
+
     }
 
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         //when the activity first created the user will get default java job positions
-        fetchData("java");
+        fetchData("android");
     }
 
     //method to populate recycler viw when async task finishes JSON parsing
     @Override
     public void onLoadComplete(List<JobPosition> jobs) {
-        js = jobs;
         if (getView() == null || isDetached()) return;
         progressBar.setVisibility(View.INVISIBLE);
 
         if (jobs.size()==0 && JobActivity.showToast%2!=0 && !MainActivity.notConnected) {
-                showCustomToast();
+            showCustomToast();
         }
-
-        RecyclerView mRecyclerView = (RecyclerView) getView().findViewById(R.id.recycler_view_jobs);
-        mRecyclerView.setHasFixedSize(true);
-        LinearLayoutManager mLayoutManager = new LinearLayoutManager(getActivity());
-        mRecyclerView.setLayoutManager(mLayoutManager);
-        JobAdapter mAdapter = new JobAdapter(jobs, getActivity());
+        mAdapter = new JobAdapter(jobs, getActivity());
         mRecyclerView.setAdapter(mAdapter);
     }
 
@@ -86,8 +86,5 @@ public class FrontFragment extends Fragment implements JobSearchAsync.MyListener
         toast.setView(layout);
         toast.show();
     }
-
-
-
 }
 
