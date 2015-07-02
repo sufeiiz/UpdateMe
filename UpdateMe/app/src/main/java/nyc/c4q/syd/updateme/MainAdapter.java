@@ -337,14 +337,14 @@ public class MainAdapter extends RecyclerView.Adapter {
         @Override
         public void onMapReady(final GoogleMap map) {
             map.getUiSettings().setMapToolbarEnabled(true);
+            map.getUiSettings().setZoomControlsEnabled(true);
+            map.getUiSettings().setCompassEnabled(true);
+            map.getUiSettings().setMapToolbarEnabled(true);
+            map.getUiSettings().setTiltGesturesEnabled(true);
+            map.getUiSettings().setScrollGesturesEnabled(true);
+            map.getUiSettings().setRotateGesturesEnabled(true);
             map.setMyLocationEnabled(true);
             map.setMapType(GoogleMap.MAP_TYPE_NORMAL);
-            GoogleMapOptions options = new GoogleMapOptions();
-            options.compassEnabled(true);
-            options.rotateGesturesEnabled(true);
-            options.scrollGesturesEnabled(true);
-            options.tiltGesturesEnabled(true);
-            options.mapToolbarEnabled(true);
 
             // create new marker when map is clicked, manipulated to allow only 1 marker
             map.setOnMapClickListener(createMarkerListener);
@@ -392,7 +392,7 @@ public class MainAdapter extends RecyclerView.Adapter {
 
             // Set initial view to current location
             map.moveCamera(CameraUpdateFactory.newLatLng(locationLatLng));
-            map.animateCamera(CameraUpdateFactory.zoomTo(17));
+            map.animateCamera(CameraUpdateFactory.zoomTo(15));
 
             if (hasSavedAdd) {
                 Log.d("Map", "Has Saved Address - loading destination");

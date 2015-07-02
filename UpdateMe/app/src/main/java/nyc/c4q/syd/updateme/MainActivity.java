@@ -37,7 +37,7 @@ public class MainActivity extends Activity implements JobSearchAsync.MyListener 
         progressBar = (ProgressBar) findViewById(R.id.progress);
         //create a jobList container for data which will get returned from jobAsync
         jobList = new ArrayList<JobPosition>();
-        stockList = new ArrayList<>();
+        stockList = new ArrayList<StockInfo>();
 
 
         if (!isNetworkConnected()) {

@@ -11,7 +11,6 @@ import android.widget.AdapterView;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.Spinner;
-import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -139,9 +138,6 @@ public class MapSettings extends FragmentActivity implements GoogleApiClient.OnC
             PendingResult<PlaceBuffer> placeResult = Places.GeoDataApi
                     .getPlaceById(client, placeId);
             placeResult.setResultCallback(mUpdatePlaceDetailsCallback);
-
-            Toast.makeText(getApplicationContext(), "Clicked: " + item.description,
-                    Toast.LENGTH_SHORT).show();
             Log.i(TAG, "Called getPlaceById to get Place details for " + item.placeId);
         }
     };
@@ -165,12 +161,6 @@ public class MapSettings extends FragmentActivity implements GoogleApiClient.OnC
     // could resolve the error automatically.
     @Override
     public void onConnectionFailed(ConnectionResult connectionResult) {
-
         Log.e(TAG, "onConnectionFailed: ConnectionResult.getErrorCode() = " + connectionResult.getErrorCode());
-
-        // TODO(Developer): Check error code and notify the user of error state and resolution.
-        Toast.makeText(this,
-                "Could not connect to Google API Client: Error " + connectionResult.getErrorCode(),
-                Toast.LENGTH_SHORT).show();
     }
 }
