@@ -1,6 +1,8 @@
 package nyc.c4q.syd.updateme;
 
 import android.content.Context;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -26,6 +28,7 @@ import java.util.List;
 public class FrontFragment extends Fragment implements JobSearchAsync.MyListener {
 
     private ProgressBar progressBar;
+    List<JobPosition> js;
 
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -48,6 +51,7 @@ public class FrontFragment extends Fragment implements JobSearchAsync.MyListener
     //method to populate recycler viw when async task finishes JSON parsing
     @Override
     public void onLoadComplete(List<JobPosition> jobs) {
+        js = jobs;
         if (getView() == null || isDetached()) return;
         progressBar.setVisibility(View.INVISIBLE);
 
@@ -55,11 +59,10 @@ public class FrontFragment extends Fragment implements JobSearchAsync.MyListener
                 showCustomToast();
         }
 
-        RecyclerView mRecyclerView = (RecyclerView) getView().findViewById(R.id.recycler_view);
+        RecyclerView mRecyclerView = (RecyclerView) getView().findViewById(R.id.recycler_view_jobs);
         mRecyclerView.setHasFixedSize(true);
         LinearLayoutManager mLayoutManager = new LinearLayoutManager(getActivity());
         mRecyclerView.setLayoutManager(mLayoutManager);
-
         JobAdapter mAdapter = new JobAdapter(jobs, getActivity());
         mRecyclerView.setAdapter(mAdapter);
     }
@@ -83,6 +86,8 @@ public class FrontFragment extends Fragment implements JobSearchAsync.MyListener
         toast.setView(layout);
         toast.show();
     }
+
+
 
 }
 
