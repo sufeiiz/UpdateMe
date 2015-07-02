@@ -81,9 +81,9 @@ public class MainAdapter extends RecyclerView.Adapter {
             super(v);
 
             lvItems = (ListView) v.findViewById(R.id.list);
-            items = new ArrayList<>();
+            items = new ArrayList<String>();
             readItems();
-            itemsAdapter = new ArrayAdapter<>(context, R.layout.todo_list, R.id.text, items);
+            itemsAdapter = new ArrayAdapter<String>(context, R.layout.todo_list, R.id.text, items);
             lvItems.setAdapter(itemsAdapter);
             setListViewHeightBasedOnChildren(lvItems);
             if (items.size() == 0)
@@ -100,9 +100,9 @@ public class MainAdapter extends RecyclerView.Adapter {
             File filesDir = context.getFilesDir();
             File todoFile = new File(filesDir, "todo.txt");
             try {
-                items = new ArrayList<>(FileUtils.readLines(todoFile));
+                items = new ArrayList<String>(FileUtils.readLines(todoFile));
             } catch (IOException e) {
-                items = new ArrayList<>();
+                items = new ArrayList<String>();
             }
         }
 
@@ -516,9 +516,9 @@ public class MainAdapter extends RecyclerView.Adapter {
             super(v);
 
             lvStocks = (ListView) v.findViewById(R.id.stockList);
-            stocks = new ArrayList<>();
+            stocks = new ArrayList<String>();
             readItems();
-            stockAdapter = new ArrayAdapter<>(context, R.layout.stock_textview, stocks);
+            stockAdapter = new ArrayAdapter<String>(context, R.layout.stock_textview, stocks);
             lvStocks.setAdapter(stockAdapter);
             setListViewHeightBasedOnChildren(lvStocks);
             if (stocks.size() == 0)
@@ -535,9 +535,9 @@ public class MainAdapter extends RecyclerView.Adapter {
             File filesDir = context.getFilesDir();
             File todoFile = new File(filesDir, "stock.txt");
             try {
-                stocks = new ArrayList<>(FileUtils.readLines(todoFile));
+                stocks = new ArrayList<String>(FileUtils.readLines(todoFile));
             } catch (IOException e) {
-                stocks = new ArrayList<>();
+                stocks = new ArrayList<String>();
             }
         }
 
@@ -587,27 +587,28 @@ public class MainAdapter extends RecyclerView.Adapter {
 
         // option to delete item from stock list
         AdapterView.OnItemLongClickListener lvItemLongClickListener = new AdapterView.OnItemLongClickListener() {
+
             @Override
-            public boolean onItemLongClick(AdapterView<?> adapterView, View view, int i, long l) {
+            public boolean onItemLongClick(AdapterView<?> adapterView, View view, final int i, long l) {
                 AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(context);
-                dialogBuilder.setTitle("Remove Stock")
+                dialogBuilder.setTitle("Remove Stock?")
                         .setMessage("Are you sure?")
                         .setNegativeButton("No", null)
                         .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                             @Override
-                            public void onClick(DialogInterface dialogInterface, int i) {
+                            public void onClick(DialogInterface dialogInterface, int pos) {
                                 stocks.remove(i);
                                 stockAdapter.notifyDataSetChanged();
                                 writeItems();
                                 setListViewHeightBasedOnChildren(lvStocks);
-                                Toast.makeText(context, "Stock removed!", Toast.LENGTH_LONG).show();
+                                Toast.makeText(context, "Stock Removed!", Toast.LENGTH_LONG).show();
                             }
                         });
                 AlertDialog alertDialog = dialogBuilder.create();
                 alertDialog.show();
-
-                return false;
+                return true;
             }
+
         };
     }
     

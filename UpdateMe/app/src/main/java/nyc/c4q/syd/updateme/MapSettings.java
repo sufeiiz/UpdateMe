@@ -1,7 +1,5 @@
 package nyc.c4q.syd.updateme;
 
-import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -10,11 +8,8 @@ import android.util.Log;
 import android.view.View;
 import android.view.Window;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
-import android.widget.Filter;
-import android.widget.Filterable;
 import android.widget.Spinner;
 import android.widget.Toast;
 
@@ -68,22 +63,18 @@ public class MapSettings extends FragmentActivity implements GoogleApiClient.OnC
 
         Button btnLoadDirections = (Button) findViewById(R.id.load_directions);
         mode = (Spinner) findViewById(R.id.mode_spinner);
+        //TODO: spinner layout
 //        ArrayAdapter adapter = ArrayAdapter.createFromResource(this, R.array.mode_arrays, R.id.spinner_text);
 //        mode.setAdapter(adapter);
 
-        switch (mode_saved) {
-            case "Transit":
-                mode.setSelection(1);
-                break;
-            case "Bicycling":
-                mode.setSelection(2);
-                break;
-            case "Walking":
-                mode.setSelection(3);
-                break;
-            default:
-                mode.setSelection(0);
-                break;
+        if (mode_saved.equals("Transit")) {
+            mode.setSelection(1);
+        } else if (mode_saved.equals("Bicycling")) {
+            mode.setSelection(2);
+        } else if (mode_saved.equals("Walking")) {
+            mode.setSelection(3);
+        } else {
+            mode.setSelection(0);
         }
 
         btnLoadDirections.setOnClickListener(new View.OnClickListener() {
