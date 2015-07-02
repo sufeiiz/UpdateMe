@@ -49,10 +49,8 @@
                     android:layout_gravity="fill_horizontal"
                     android:layout_marginTop="20dp"
                     android:text="Home"
-                    android:textColor="#388E3C"
                     android:textSize="16dp"
                     android:textStyle="bold" />
-
 
                 <AutoCompleteTextView
                     android:id="@+id/from"
@@ -88,7 +86,6 @@
                     android:layout_gravity="fill_horizontal"
                     android:layout_marginTop="20dp"
                     android:text="Mode of Transportation"
-                    android:textColor="#388E3C"
                     android:textSize="16dp"
                     android:textStyle="bold" />
 
