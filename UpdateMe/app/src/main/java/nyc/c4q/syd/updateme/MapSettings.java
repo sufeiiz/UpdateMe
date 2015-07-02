@@ -27,10 +27,6 @@ import com.google.android.gms.location.places.Places;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
 /**
  * Created by sufeizhao on 6/29/15.
  */
@@ -38,7 +34,7 @@ public class MapSettings extends FragmentActivity implements GoogleApiClient.OnC
 
     private static final String API_KEY = "AIzaSyDTaAeiCfVCXJhdweubPkgIvsni3s1-9ss";
     private static final LatLngBounds BOUNDS = new LatLngBounds(
-            new LatLng(-34.041458, 150.790100), new LatLng(-33.682247, 151.383362));
+            new LatLng(40.498425, -74.250219), new LatLng(40.792266, -73.776434));
     private PlaceAutocompleteAdapter mAdapter;
     protected static final int RESULT_CODE = 123;
     private GoogleApiClient client;

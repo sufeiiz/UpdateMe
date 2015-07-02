@@ -41,8 +41,6 @@ import java.util.concurrent.TimeUnit;
 public class PlaceAutocompleteAdapter extends ArrayAdapter<PlaceAutocompleteAdapter.PlaceAutocomplete>
         implements Filterable {
     private static final String TAG = "AutocompleteAdapter";
-    private static final LatLngBounds BOUNDS = new LatLngBounds(
-            new LatLng(-34.041458, 150.790100), new LatLng(-33.682247, 151.383362));
     private ArrayList<PlaceAutocomplete> mResultList;
     private GoogleApiClient mGoogleApiClient;
     private LatLngBounds mBounds;
