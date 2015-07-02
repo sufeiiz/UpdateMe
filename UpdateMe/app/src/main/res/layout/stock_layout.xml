@@ -12,6 +12,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="#4CAF50"
+        android:layout_margin="8dp"
+        android:padding="8dp"
         android:orientation="horizontal">
 
         <TextView
