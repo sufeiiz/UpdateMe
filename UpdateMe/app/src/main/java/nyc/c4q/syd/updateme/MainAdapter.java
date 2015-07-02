@@ -1,7 +1,11 @@
 package nyc.c4q.syd.updateme;
 
 import android.app.Activity;
+import android.app.AlarmManager;
 import android.app.AlertDialog;
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -10,6 +14,7 @@ import android.content.SharedPreferences;
 import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.v4.app.NotificationCompat;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -19,12 +24,14 @@ import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.TimePicker;
 import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -47,6 +54,7 @@ import org.apache.commons.io.FileUtils;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 
 /**
@@ -75,7 +83,7 @@ public class MainAdapter extends RecyclerView.Adapter {
             lvItems = (ListView) v.findViewById(R.id.list);
             items = new ArrayList<>();
             readItems();
-            itemsAdapter = new ArrayAdapter<>(context, R.layout.todo_textview, items);
+            itemsAdapter = new ArrayAdapter<>(context, R.layout.todo_list, R.id.text, items);
             lvItems.setAdapter(itemsAdapter);
             setListViewHeightBasedOnChildren(lvItems);
             if (items.size() == 0)
@@ -84,6 +92,7 @@ public class MainAdapter extends RecyclerView.Adapter {
             ImageButton add = (ImageButton) v.findViewById(R.id.add);
             add.setOnClickListener(addTODOListener);
             lvItems.setOnItemClickListener(lvItemClickListener);
+            lvItems.setOnItemLongClickListener(lvItemLongClickListener);
         }
 
         // save and load items from to-do list
@@ -152,6 +161,64 @@ public class MainAdapter extends RecyclerView.Adapter {
                 alertDialog.show();
             }
         };
+
+        AdapterView.OnItemLongClickListener lvItemLongClickListener = (new AdapterView.OnItemLongClickListener() {
+            @Override
+            public boolean onItemLongClick(final AdapterView<?> parent, final View view, final int position, long id) {
+                AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(context);
+                final DatePicker setDate = new DatePicker(context);
+                setDate.setSpinnersShown(false);
+                dialogBuilder.setTitle("Set Reminder on Date")
+                        .setView(setDate)
+                        .setNegativeButton("Cancel", null)
+                        .setPositiveButton("Next", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                notificationDate(items.get(position),
+                                        setDate.getYear(), setDate.getMonth(), setDate.getDayOfMonth(),
+                                        parent, position);
+                            }
+                        });
+                AlertDialog alertDialog = dialogBuilder.create();
+                alertDialog.show();
+                return true;
+            }
+        });
+
+        public void notificationDate(final String task, final int year, final int month, final int day,
+                                     final AdapterView<?> parent, final int position) {
+            AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(context);
+            final TimePicker setTime = new TimePicker(context);
+            dialogBuilder.setTitle("Set Reminder at Time")
+                    .setView(setTime)
+                    .setNegativeButton("Cancel", null)
+                    .setPositiveButton("Set Reminder", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                            setNotification(task, year, month, day,
+                                    setTime.getCurrentHour(), setTime.getCurrentMinute());
+                            //TODO: make invisible again?
+                            View image = parent.getChildAt(position);
+                            image.findViewById(R.id.icon).setVisibility(View.VISIBLE);
+                        }
+                    });
+            AlertDialog alertDialog = dialogBuilder.create();
+            alertDialog.show();
+        }
+
+        public void setNotification(String task, int year, int month, int day, int hour, int min) {
+            Calendar cal = Calendar.getInstance();
+            cal.set(year, month, day);
+            cal.set(Calendar.HOUR_OF_DAY, hour);
+            cal.set(Calendar.MINUTE, min);
+            long millis = cal.getTimeInMillis();
+
+            Intent intent = new Intent(context, AlarmReceiver.class);
+            intent.putExtra("task", task);
+            PendingIntent mAlarmSender = PendingIntent.getBroadcast(context, 0, intent, 0);
+            AlarmManager am = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+            am.set(AlarmManager.RTC_WAKEUP, millis, mAlarmSender);
+        }
     }
 
     /* JOB VIEW */
@@ -543,6 +610,7 @@ public class MainAdapter extends RecyclerView.Adapter {
             }
         };
     }
+    
     //get type of card
     @Override
     public int getItemViewType(int position) {
