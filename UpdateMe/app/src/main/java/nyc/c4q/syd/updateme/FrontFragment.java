@@ -44,7 +44,6 @@ public class FrontFragment extends Fragment implements JobSearchAsync.MyListener
         mRecyclerView.setHasFixedSize(true);
         LinearLayoutManager mLayoutManager = new LinearLayoutManager(getActivity());
         mRecyclerView.setLayoutManager(mLayoutManager);
-
     }
 
     @Override
