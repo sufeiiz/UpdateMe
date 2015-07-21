@@ -39,4 +39,10 @@
     <string name="keyword">Type in keyword</string>
     <string name="location">Type in the location</string>
 
+    <array name="menu">
+        <item>To Do List</item>
+        <item>Job Search</item>
+        <item>Navigation</item>
+        <item>Investments</item>
+    </array>
 </resources>
