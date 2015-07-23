@@ -18,47 +18,56 @@ import android.widget.ListView;
  */
 public class TabletActivity extends Activity {
 
+    private FragmentManager fm;
+    private FragmentTransaction ft;
+    private ListView menu_list;
+    private static int mCurrentSelectedPosition = 0;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.tablet);
 
-        FragmentManager fm = getFragmentManager();
-        FragmentTransaction ft = fm.beginTransaction();
+        fm = getFragmentManager();
+        ft = fm.beginTransaction();
         ft.add(R.id.container, new MenuFragment());
         ft.add(R.id.container, new ContentFragment());
         ft.commit();
 
     }
 
-    private class MenuFragment extends Fragment {
+    public static class MenuFragment extends Fragment {
         @Nullable
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-            View view = inflater.inflate(R.layout.menu_fragment, container, false);
-
-            ArrayAdapter<String> adapter = new ArrayAdapter<String>(view.getContext(), android.R.layout.simple_list_item_1, R.array.menu);
-            ListView menu_list = (ListView) findViewById(R.id.menu_list);
-            menu_list.setAdapter(adapter);
-
+            ListView menu_list = (ListView) inflater.inflate(R.layout.menu_fragment, container, false);
             menu_list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                 @Override
                 public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 
+
+                    //TODO replace
+//            ft.replace(R.id.container, fragment);
+//            ft.addToBackStack(null);
+//            ft.commit()
                 }
             });
 
-            return view;
+            menu_list.setAdapter(new ArrayAdapter<String>(
+                    menu_list.getContext(),
+                    android.R.layout.simple_list_item_1,
+                    getResources().getStringArray(R.array.menu)));
+            menu_list.setItemChecked(mCurrentSelectedPosition, true);
+            return menu_list;
         }
     }
 
-    public class ContentFragment extends Fragment {
+    public static class ContentFragment extends Fragment {
         @Nullable
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-            View view = inflater.inflate(R.layout.content_fragment, container, false);
-
-
+            View view = inflater.inflate(R.layout.menu_fragment, container, false);
+;
 
             return view;
         }
