@@ -1,0 +1,124 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#b6b6b6"
+    android:orientation="vertical"
+    android:padding="10dp">
+
+    <TextView
+        android:background="#4CAF50"
+        android:id="@+id/companyNameTextView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="10dp"
+        android:gravity="center_horizontal"
+        android:text="@string/stock_company_name"
+        android:textSize="25sp"
+        android:textColor="#fff"
+        android:textStyle="bold"/>
+
+    <android.support.v7.widget.CardView xmlns:card_view="http://schemas.android.com/apk/res-auto"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_gravity="center"
+        card_view:cardBackgroundColor="#C8E6C9"
+        card_view:cardCornerRadius="4dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/last_trade_price_only"
+                android:id="@+id/lastTradePriceTextView"
+                android:textColor="#388E3C"
+                android:gravity="center_vertical"
+                android:padding="5dp"
+                android:textSize="20sp"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/changeTextView"
+                android:text="@string/change"
+                android:textColor="#388E3C"
+                android:gravity="center_vertical"
+                android:padding="5dp"
+                android:textSize="20sp"/>
+
+            <TextView
+                android:id="@+id/daysHighTextView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/stock_days_high"
+                android:textSize="20sp"
+                android:textColor="#388E3C"
+                android:gravity="center_vertical"
+                android:padding="5dp"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/stock_days_low"
+                android:id="@+id/daysLowTextView"
+                android:textSize="20sp"
+                android:textColor="#388E3C"
+                android:gravity="center_vertical"
+                android:padding="5dp"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/yearHighTextView"
+                android:text="@string/stock_year_high"
+                android:textSize="20sp"
+                android:textColor="#388E3C"
+                android:gravity="center_vertical"
+                android:padding="5dp"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/stock_year_low"
+                android:id="@+id/yearLowTextView"
+                android:textSize="20sp"
+                android:textColor="#388E3C"
+                android:gravity="center_vertical"
+                android:padding="5dp"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/daysRangeTextView"
+                android:text="@string/days_range"
+                android:textSize="20sp"
+                android:textColor="#388E3C"
+                android:gravity="center_vertical"
+                android:padding="5dp"/>
+
+            <Button
+                android:id="@+id/moreInfoButton"
+                android:layout_marginTop="20dp"
+                android:text="More Info"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:background="#4CAF50"
+                android:textColor="#fff"
+                android:padding="10dp"/>
+
+        </LinearLayout>
+
+
+    </android.support.v7.widget.CardView>
+
+
+
+
+
+
+</LinearLayout>

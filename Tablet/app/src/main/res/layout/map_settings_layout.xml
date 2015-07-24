@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#b6b6b6"
+    android:padding="6dp"
+    tools:context=".MainActivity">
+
+    <LinearLayout
+        android:id="@+id/card_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_gravity="center">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/settings_label"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="2"
+                android:gravity="center"
+                android:text="Settings"
+                style="@style/title"
+                android:layout_margin="8dp"
+                android:padding="8dp"
+                android:background="#388E3C"/>
+
+            <GridLayout
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="13"
+                android:alignmentMode="alignBounds"
+                android:background="#C8E6C9"
+                android:columnCount="1"
+                android:orientation="horizontal"
+                android:padding="10dp"
+                android:useDefaultMargins="true">
+
+                <TextView
+                    android:id="@+id/from_label"
+                    android:layout_gravity="fill_horizontal"
+                    android:layout_marginTop="20dp"
+                    android:text="Home"
+                    android:textColor="#388E3C"
+                    android:textSize="16dp"
+                    android:textStyle="bold" />
+
+                <AutoCompleteTextView
+                    android:id="@+id/from"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="fill_horizontal"
+                    android:layout_marginTop="10dp"
+                    android:completionThreshold="3" />
+
+
+                <TextView
+                    android:id="@+id/to_label"
+                    android:layout_gravity="fill_horizontal"
+                    android:layout_marginTop="20dp"
+                    android:text="Work"
+                    android:textColor="#388E3C"
+                    android:textSize="16dp"
+                    android:textStyle="bold" />
+
+
+                <AutoCompleteTextView
+                    android:id="@+id/to"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="fill_horizontal"
+                    android:layout_marginTop="10dp"
+                    android:completionThreshold="3"/>
+
+                <TextView
+                    android:id="@+id/mode_label"
+                    android:layout_gravity="fill_horizontal"
+                    android:layout_marginTop="20dp"
+                    android:text="Mode of Transportation"
+                    android:textSize="16dp"
+                    android:textStyle="bold" />
+
+                <Spinner
+                    android:id="@+id/mode_spinner"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:entries="@array/mode_arrays" />
+
+                <Button
+                    android:id="@+id/load_directions"
+                    style="@style/Base.Widget.AppCompat.Button.Borderless"
+                    android:layout_columnSpan="1"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_marginTop="15dp"
+                    android:text="Save"
+                    android:textColor="#fff"
+                    android:background="#388E3C"
+                    android:textSize="20dp" />
+
+            </GridLayout>
+        </LinearLayout>
+    </LinearLayout>
+</RelativeLayout>
